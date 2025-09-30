@@ -93,7 +93,7 @@ resource "google_compute_instance" "this_nodes" {
 
   # to avoid changes in case new latest image released or zone changes
   lifecycle {
-    ignore_changes = [boot_disk, zone]
+    ignore_changes = [boot_disk, zone, metadata["ssh-keys"]]
   }
 
   metadata = {
