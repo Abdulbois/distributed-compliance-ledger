@@ -221,9 +221,9 @@ func TestHandler_AddModel_CheckCommissioningModeSecondaryStepsHintHandling(t *te
 		expectedCommissioningModeSecondaryStepsHint uint32
 	}{
 		{
-			name:                                "CommissioningModeSecondaryStepsHint=0 Sets Default 1",
+			name:                                "CommissioningModeSecondaryStepsHint=0 Sets Default 4",
 			commissioningModeSecondaryStepsHint: 0,
-			expectedCommissioningModeSecondaryStepsHint: 1,
+			expectedCommissioningModeSecondaryStepsHint: 4,
 		},
 		{
 			name:                                "CommissioningModeSecondaryStepsHint=3 Remains 3",

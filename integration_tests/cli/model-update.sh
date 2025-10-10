@@ -77,7 +77,7 @@ check_response "$result" "\"pid\": $pid"
 check_response "$result" "\"productLabel\": \"$productLabel\""
 check_response "$result" "\"schemaVersion\": $schema_version_0"
 check_response "$result" "\"commissioningModeInitialStepsHint\": 1"
-check_response "$result" "\"commissioningModeSecondaryStepsHint\": 1"
+check_response "$result" "\"commissioningModeSecondaryStepsHint\": 4"
 check_response "$result" "\"icdUserActiveModeTriggerHint\": 1"
 check_response "$result" "\"factoryResetStepsHint\": 1"
 check_response "$result" "\"enhancedSetupFlowOptions\": $enhancedSetupFlowOptions_0"
@@ -101,7 +101,7 @@ test_divider
 echo "Update Model with VID: ${vid} PID: ${pid} with new description, commissioningModeInitialStepsHint and commissioningModeSecondaryStepsHint"
 description="New Device Description"
 commissioningModeInitialStepsHint=3
-commissioningModeSecondaryStepsHint=4
+commissioningModeSecondaryStepsHint=7
 factoryResetStepsHint=5
 icdUserActiveModeTriggerHint=6
 enhancedSetupFlowOptions_2=2
@@ -115,7 +115,7 @@ echo "$result"
 
 test_divider
 
-# check updated values for commissioningModeInitialStepsHint == 3 and commissioningModeSecondaryStepsHint == 4
+# check updated values for commissioningModeInitialStepsHint == 3 and commissioningModeSecondaryStepsHint == 7
 echo "Get Model with VID: ${vid} PID: ${pid}"
 result=$(dcld query model get-model --vid=$vid --pid=$pid)
 check_response "$result" "\"vid\": $vid"

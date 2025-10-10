@@ -71,7 +71,7 @@ func (k msgServer) CreateModel(goCtx context.Context, msg *types.MsgCreateModel)
 	}
 
 	if model.CommissioningModeSecondaryStepsHint == 0 {
-		model.CommissioningModeSecondaryStepsHint = 1
+		model.CommissioningModeSecondaryStepsHint = 4
 	}
 
 	if model.IcdUserActiveModeTriggerHint == 0 {
