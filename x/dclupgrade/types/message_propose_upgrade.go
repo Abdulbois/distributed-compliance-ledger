@@ -94,7 +94,7 @@ func ValidateBinaries(msg *MsgProposeUpgrade, gitBaseURL string) error {
 
 		urlGitTag := partsURL[7]
 
-		if msg.Plan.Name != urlGitTag {
+		if !strings.Contains(urlGitTag, msg.Plan.Name) {
 			return errors.Wrapf(sdkerrors.ErrInvalidRequest, "planName is not equal to the binary file version")
 		}
 
