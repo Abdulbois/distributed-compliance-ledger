@@ -19,7 +19,7 @@ source integration_tests/cli/common.sh
 # Upgrade constants
 
 # TODO it must be v1.5 before actual 1.5 release
-DCLD_BIN_OLD="/tmp/dcld_bins/dcld_v1.5.1"
+DCLD_BIN_OLD="/tmp/dcld_bins/dcld_v1.5.2"
 DCLD_BIN_NEW="/tmp/dcld_bins/dcld_master"
 DCL_DIR="/var/lib/dcl/.dcl"
 
@@ -121,59 +121,59 @@ test_divider
 
 # MODEL
 
-echo "Get Model with VID: $vid_for_1_5_1 PID: $pid_1_for_1_5_1"
-result=$($DCLD_BIN_NEW query model get-model --vid=$vid_for_1_5_1 --pid=$pid_1_for_1_5_1)
-check_response "$result" "\"vid\": $vid_for_1_5_1"
-check_response "$result" "\"pid\": $pid_1_for_1_5_1"
-check_response "$result" "\"productLabel\": \"$product_label_for_1_5_1\""
+echo "Get Model with VID: $vid_for_1_5_2 PID: $pid_1_for_1_5_2"
+result=$($DCLD_BIN_NEW query model get-model --vid=$vid_for_1_5_2 --pid=$pid_1_for_1_5_2)
+check_response "$result" "\"vid\": $vid_for_1_5_2"
+check_response "$result" "\"pid\": $pid_1_for_1_5_2"
+check_response "$result" "\"productLabel\": \"$product_label_for_1_5_2\""
 
-echo "Get Model with VID: $vid_for_1_5_1 PID: $pid_2_for_1_5_1"
-result=$($DCLD_BIN_NEW query model get-model --vid=$vid_for_1_5_1 --pid=$pid_2_for_1_5_1)
-check_response "$result" "\"vid\": $vid_for_1_5_1"
-check_response "$result" "\"pid\": $pid_2_for_1_5_1"
-check_response "$result" "\"productLabel\": \"$product_label_for_1_5_1\""
+echo "Get Model with VID: $vid_for_1_5_2 PID: $pid_2_for_1_5_2"
+result=$($DCLD_BIN_NEW query model get-model --vid=$vid_for_1_5_2 --pid=$pid_2_for_1_5_2)
+check_response "$result" "\"vid\": $vid_for_1_5_2"
+check_response "$result" "\"pid\": $pid_2_for_1_5_2"
+check_response "$result" "\"productLabel\": \"$product_label_for_1_5_2\""
 
-echo "Check Model with VID: $vid_for_1_5_1 PID: $pid_2_for_1_5_1 updated"
+echo "Check Model with VID: $vid_for_1_5_2 PID: $pid_2_for_1_5_2 updated"
 result=$($DCLD_BIN_NEW query model get-model --vid=$vid --pid=$pid_2)
 check_response "$result" "\"vid\": $vid"
 check_response "$result" "\"pid\": $pid_2"
-check_response "$result" "\"productLabel\": \"$product_label_for_1_5_1\""
-check_response "$result" "\"partNumber\": \"$part_number_for_1_5_1\""
+check_response "$result" "\"productLabel\": \"$product_label_for_1_5_2\""
+check_response "$result" "\"partNumber\": \"$part_number_for_1_5_2\""
 
-echo "Check Model version with VID: $vid_for_1_5_1 PID: $pid_2_for_1_5_1 updated"
+echo "Check Model version with VID: $vid_for_1_5_2 PID: $pid_2_for_1_5_2 updated"
 result=$($DCLD_BIN_NEW query model model-version --vid=$vid --pid=$pid_2  --softwareVersion=$software_version)
 check_response "$result" "\"vid\": $vid"
 check_response "$result" "\"pid\": $pid_2"
-check_response "$result" "\"minApplicableSoftwareVersion\": $min_applicable_software_version_for_1_5_1"
-check_response "$result" "\"maxApplicableSoftwareVersion\": $max_applicable_software_version_for_1_5_1"
+check_response "$result" "\"minApplicableSoftwareVersion\": $min_applicable_software_version_for_1_5_2"
+check_response "$result" "\"maxApplicableSoftwareVersion\": $max_applicable_software_version_for_1_5_2"
 
 echo "Get all models"
 result=$($DCLD_BIN_NEW query model all-models)
-check_response "$result" "\"vid\": $vid_for_1_5_1"
-check_response "$result" "\"pid\": $pid_1_for_1_5_1"
-check_response "$result" "\"pid\": $pid_2_for_1_5_1"
+check_response "$result" "\"vid\": $vid_for_1_5_2"
+check_response "$result" "\"pid\": $pid_1_for_1_5_2"
+check_response "$result" "\"pid\": $pid_2_for_1_5_2"
 
 echo "Get all model versions"
-result=$($DCLD_BIN_NEW query model all-model-versions --vid=$vid_for_1_5_1 --pid=$pid_1_for_1_5_1)
-check_response "$result" "\"vid\": $vid_for_1_5_1"
-check_response "$result" "\"pid\": $pid_1_for_1_5_1"
+result=$($DCLD_BIN_NEW query model all-model-versions --vid=$vid_for_1_5_2 --pid=$pid_1_for_1_5_2)
+check_response "$result" "\"vid\": $vid_for_1_5_2"
+check_response "$result" "\"pid\": $pid_1_for_1_5_2"
 
-echo "Get Vendor Models with VID: ${vid_for_1_5_1}"
-result=$($DCLD_BIN_NEW query model vendor-models --vid=$vid_for_1_5_1)
-check_response "$result" "\"pid\": $pid_1_for_1_5_1"
-check_response "$result" "\"pid\": $pid_2_for_1_5_1"
+echo "Get Vendor Models with VID: ${vid_for_1_5_2}"
+result=$($DCLD_BIN_NEW query model vendor-models --vid=$vid_for_1_5_2)
+check_response "$result" "\"pid\": $pid_1_for_1_5_2"
+check_response "$result" "\"pid\": $pid_2_for_1_5_2"
 
-echo "Get model version VID: $vid_for_1_5_1 PID: $pid_1_for_1_5_1"
-result=$($DCLD_BIN_NEW query model model-version --vid=$vid_for_1_5_1 --pid=$pid_1_for_1_5_1 --softwareVersion=$software_version_for_1_5_1)
-check_response "$result" "\"vid\": $vid_for_1_5_1"
-check_response "$result" "\"pid\": $pid_1_for_1_5_1"
-check_response "$result" "\"softwareVersion\": $software_version_for_1_5_1"
+echo "Get model version VID: $vid_for_1_5_2 PID: $pid_1_for_1_5_2"
+result=$($DCLD_BIN_NEW query model model-version --vid=$vid_for_1_5_2 --pid=$pid_1_for_1_5_2 --softwareVersion=$software_version_for_1_5_2)
+check_response "$result" "\"vid\": $vid_for_1_5_2"
+check_response "$result" "\"pid\": $pid_1_for_1_5_2"
+check_response "$result" "\"softwareVersion\": $software_version_for_1_5_2"
 
-echo "Get model version VID: $vid_for_1_5_1 PID: $pid_2_for_1_5_1"
-result=$($DCLD_BIN_NEW query model model-version --vid=$vid_for_1_5_1 --pid=$pid_2_for_1_5_1 --softwareVersion=$software_version_for_1_5_1)
-check_response "$result" "\"vid\": $vid_for_1_5_1"
-check_response "$result" "\"pid\": $pid_2_for_1_5_1"
-check_response "$result" "\"softwareVersion\": $software_version_for_1_5_1"
+echo "Get model version VID: $vid_for_1_5_2 PID: $pid_2_for_1_5_2"
+result=$($DCLD_BIN_NEW query model model-version --vid=$vid_for_1_5_2 --pid=$pid_2_for_1_5_2 --softwareVersion=$software_version_for_1_5_2)
+check_response "$result" "\"vid\": $vid_for_1_5_2"
+check_response "$result" "\"pid\": $pid_2_for_1_5_2"
+check_response "$result" "\"softwareVersion\": $software_version_for_1_5_2"
 
 test_divider
 

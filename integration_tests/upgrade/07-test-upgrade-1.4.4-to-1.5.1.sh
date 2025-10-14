@@ -497,6 +497,7 @@ icd_user_active_mode_trigger_hint_for_1_5_1=4
 icd_user_active_mode_trigger_instruction_for_1_5_1="icd_user_active_mode_trigger_hint_for_1_5_1"
 factory_reset_steps_hint_for_1_5_1=3
 factory_reset_steps_instruction_for_1_5_1="factory_reset_steps_instruction_for_1_5_1"
+commissioning_mode_sec_hint_for_1_5_1=8
 specification_version_for_1_5_1=2
 part_number_for_1_5_1="RCU2245M"
 software_version_for_1_5_1=4
@@ -579,6 +580,7 @@ test_divider
 echo "Add model vid=$vid_for_1_5_1 pid=$pid_1_for_1_5_1"
 result=$(echo $passphrase | $DCLD_BIN_NEW tx model add-model --vid=$vid_for_1_5_1 --pid=$pid_1_for_1_5_1 \
   --deviceTypeID=$device_type_id_for_1_5_1 --productName=$product_name_for_1_5_1 --productLabel=$product_label_for_1_5_1 --partNumber=$part_number_for_1_5_1 \
+  --commissioningModeSecondaryStepsHint="$commissioning_mode_sec_hint_for_1_5_1" \
   --icdUserActiveModeTriggerHint="$icd_user_active_mode_trigger_hint_for_1_5_1" --icdUserActiveModeTriggerInstruction="$icd_user_active_mode_trigger_instruction_for_1_5_1" \
   --factoryResetStepsHint="$factory_reset_steps_hint_for_1_5_1" --factoryResetStepsInstruction="$factory_reset_steps_instruction_for_1_5_1" \
   --from=$vendor_account_for_1_5_1 --yes)
@@ -860,12 +862,14 @@ check_response "$result" "\"icdUserActiveModeTriggerHint\": $icd_user_active_mod
 check_response "$result" "\"icdUserActiveModeTriggerInstruction\": \"$icd_user_active_mode_trigger_instruction_for_1_5_1\""
 check_response "$result" "\"factoryResetStepsHint\": $factory_reset_steps_hint_for_1_5_1"
 check_response "$result" "\"factoryResetStepsInstruction\": \"$factory_reset_steps_instruction_for_1_5_1\""
+check_response "$result" "\"commissioningModeSecondaryStepsHint\": $commissioning_mode_sec_hint_for_1_5_1"
 
 echo "Get Model with VID: $vid_for_1_5_1 PID: $pid_2_for_1_5_1"
 result=$($DCLD_BIN_NEW query model get-model --vid=$vid_for_1_5_1 --pid=$pid_2_for_1_5_1)
 check_response "$result" "\"vid\": $vid_for_1_5_1"
 check_response "$result" "\"pid\": $pid_2_for_1_5_1"
 check_response "$result" "\"productLabel\": \"$product_label_for_1_5_1\""
+check_response "$result" "\"commissioningModeSecondaryStepsHint\": 1"
 
 echo "Check Model with VID: $vid_for_1_5_1 PID: $pid_2_for_1_5_1 updated"
 result=$($DCLD_BIN_NEW query model get-model --vid=$vid --pid=$pid_2)

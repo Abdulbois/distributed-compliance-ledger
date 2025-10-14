@@ -303,6 +303,20 @@ func TestMsgProposeUpgrade_ValidateBinaries(t *testing.T) {
 				Time: testconstants.Time,
 			},
 		},
+		{
+			name:     "valid binary file for a dev release",
+			expected: "{\"assets\":[{\"name\": \"dcld\", \"state\": \"uploaded\", \"digest\": \"sha256:f5c1120790319c9c4aefbfbc08a0bb1f91e848e3cd77cf3590a46d637e70cfad\", \"browser_download_url\":\"" + "https://github.com/zigbee-alliance/distributed-compliance-ledger/releases/download/v1.5.2-0.dev.1/dcld" + "\"}]}",
+			msg: MsgProposeUpgrade{
+				Creator: sample.AccAddress(),
+				Plan: Plan{
+					Name:   "v1.5.2",
+					Height: testconstants.UpgradePlanHeight,
+					Info:   "{\"binaries\":{\"linux/amd64\":\"https://github.com/zigbee-alliance/distributed-compliance-ledger/releases/download/v1.5.2-0.dev.1/dcld?checksum=sha256:f5c1120790319c9c4aefbfbc08a0bb1f91e848e3cd77cf3590a46d637e70cfad\"}}",
+				},
+				Info: testconstants.Info,
+				Time: testconstants.Time,
+			},
+		},
 	}
 	for _, tt := range positiveTests {
 		t.Run(tt.name, func(t *testing.T) {
