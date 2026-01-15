@@ -199,19 +199,12 @@ func VerifyCRLSignerCertFormat(certificate *x509.Certificate) error {
 	return nil
 }
 
-func (msg *MsgAddPkiRevocationDistributionPoint) verifySignerCertificate() error {
-	cert, err := x509.DecodeX509Certificate(msg.CrlSignerCertificate)
-	if err != nil {
-		return pkitypes.NewErrInvalidCertificate(err)
-	}
-
+func (msg *MsgAddPkiRevocationDistributionPoint) VerifyCrlSignerCertificate(cert *x509.Certificate) error {
 	if msg.IsPAA {
-		err = msg.verifyPAA(cert)
-	} else {
-		err = msg.verifyPAI(cert)
+		return msg.verifyPAA(cert)
 	}
 
-	return err
+	return msg.verifyPAI(cert)
 }
 
 func (msg *MsgAddPkiRevocationDistributionPoint) verifyFields() error {
@@ -289,10 +282,6 @@ func (msg *MsgAddPkiRevocationDistributionPoint) ValidateBasic() error {
 	}
 
 	if err = msg.verifyFields(); err != nil {
-		return err
-	}
-
-	if err = msg.verifySignerCertificate(); err != nil {
 		return err
 	}
 

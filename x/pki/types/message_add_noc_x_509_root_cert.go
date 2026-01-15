@@ -6,7 +6,6 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	pkitypes "github.com/zigbee-alliance/distributed-compliance-ledger/types/pki"
 	"github.com/zigbee-alliance/distributed-compliance-ledger/utils/validator"
-	"github.com/zigbee-alliance/distributed-compliance-ledger/x/pki/x509"
 )
 
 const TypeMsgAddNocX509RootCert = "add_noc_x_509_root_cert"
@@ -54,11 +53,6 @@ func (msg *MsgAddNocX509RootCert) ValidateBasic() error {
 	err = validator.Validate(msg)
 	if err != nil {
 		return err
-	}
-
-	_, err = x509.DecodeX509Certificate(msg.Cert)
-	if err != nil {
-		return pkitypes.NewErrInvalidCertificate(err)
 	}
 
 	return nil

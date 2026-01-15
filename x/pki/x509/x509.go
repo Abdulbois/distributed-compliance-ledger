@@ -40,8 +40,11 @@ type Certificate struct {
 }
 
 const (
-	Mvid = "Mvid"
-	Mpid = "Mpid"
+	Mvid             = "Mvid"
+	Mpid             = "Mpid"
+	MaxCertSize      = 100 * 1024 // 100 KB
+	MaxSANCount      = 100
+	MaxSubjectFields = 50
 )
 
 func DecodeX509Certificate(pemCertificate string) (*Certificate, error) {
@@ -82,14 +85,17 @@ func ToSubjectAsText(subject string) string {
 	return subjectAsText
 }
 
+var (
+	subjectFieldRegex = regexp.MustCompile(`(([^\s,]+\s?=\s?[^[\s,]+)|(([^\s,]+:\s?[^\s,]+)))`)
+	separatorRegex    = regexp.MustCompile(`(\s?=\s?)|(\s?:\s?)`)
+)
+
 func subjectAsTextToMap(subjectAsText string) map[string]string {
-	r := regexp.MustCompile(`(([^\s,]+\s?=\s?[^[\s,]+)|(([^\s,]+:\s?[^\s,]+)))`)
-	matches := r.FindAllString(subjectAsText, -1)
+	matches := subjectFieldRegex.FindAllString(subjectAsText, -1)
 
 	subjectMap := make(map[string]string)
 	for _, elem := range matches {
-		r = regexp.MustCompile(`(\s?=\s?)|(\s?:\s?)`)
-		splittedElem := r.Split(elem, -1)
+		splittedElem := separatorRegex.Split(elem, -1)
 		if splittedElem[0] == "vid" {
 			splittedElem[0] = Mvid
 		}
@@ -195,4 +201,43 @@ func (c Certificate) IsSelfSigned() bool {
 	}
 
 	return c.Issuer == c.Subject
+}
+
+// ParseAndValidateCertificate validates and parses a PEM-encoded X.509 certificate.
+// It performs the following validations:
+// 1. Checks that the certificate size does not exceed MaxCertSize (100 KB)
+// 2. Checks that the number of Subject Alternative Names (SANs) does not exceed MaxSANCount (100)
+// 3. Checks that the number of subject fields does not exceed MaxSubjectFields (50)
+//
+// Parameters:
+//   - pemCertificate: PEM-encoded X.509 certificate string
+//
+// Returns:
+//   - *Certificate: Parsed certificate structure if validation succeeds
+//   - error: Error if validation fails or certificate cannot be parsed
+func ParseAndValidateCertificate(pemCertificate string) (*Certificate, error) {
+	// 1. Check Certificate Size
+	if len(pemCertificate) > MaxCertSize {
+		return nil, pkitypes.NewErrInvalidCertificate(fmt.Sprintf("certificate size (%d bytes) exceeds maximum limit of %d bytes", len(pemCertificate), MaxCertSize))
+	}
+
+	// Parse the certificate
+	cert, err := DecodeX509Certificate(pemCertificate)
+	if err != nil {
+		return nil, pkitypes.NewErrInvalidCertificate(fmt.Sprintf("failed to parse certificate: %v", err))
+	}
+
+	// 2. Check SAN (Subject Alternative Name) count
+	sanCount := len(cert.Certificate.DNSNames) + len(cert.Certificate.EmailAddresses) + len(cert.Certificate.IPAddresses) + len(cert.Certificate.URIs)
+	if sanCount > MaxSANCount {
+		return nil, pkitypes.NewErrInvalidCertificate(fmt.Sprintf("SAN count (%d) exceeds maximum limit of %d", sanCount, MaxSANCount))
+	}
+
+	// 3. Check Subject Fields count
+	subjectFieldCount := len(cert.Certificate.Subject.Names)
+	if subjectFieldCount > MaxSubjectFields {
+		return nil, pkitypes.NewErrInvalidCertificate(fmt.Sprintf("subject field count (%d) exceeds maximum limit of %d", subjectFieldCount, MaxSubjectFields))
+	}
+
+	return cert, nil
 }

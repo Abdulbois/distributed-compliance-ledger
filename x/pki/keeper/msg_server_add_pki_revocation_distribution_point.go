@@ -14,12 +14,6 @@ import (
 func (k msgServer) AddPkiRevocationDistributionPoint(goCtx context.Context, msg *types.MsgAddPkiRevocationDistributionPoint) (*types.MsgAddPkiRevocationDistributionPointResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	// decode CrlSignerCertificate
-	crlSignerCertificate, err := x509.DecodeX509Certificate(msg.CrlSignerCertificate)
-	if err != nil {
-		return nil, pkitypes.NewErrInvalidCertificate(err)
-	}
-
 	// check if signer has vendor role
 	signerAddr, err := sdk.AccAddressFromBech32(msg.Signer)
 	if err != nil {
@@ -30,7 +24,19 @@ func (k msgServer) AddPkiRevocationDistributionPoint(goCtx context.Context, msg 
 		return nil, pkitypes.NewErrUnauthorizedRole("MsgAddPkiRevocationDistributionPoint", dclauthtypes.Vendor)
 	}
 
-	// compare VID in message and Vendor acount
+	// decode CrlSignerCertificate
+	crlSignerCertificate, err := x509.ParseAndValidateCertificate(msg.CrlSignerCertificate)
+	if err != nil {
+		return nil, pkitypes.NewErrInvalidCertificate(err)
+	}
+
+	// verify CrlSignerCertificate
+	err = msg.VerifyCrlSignerCertificate(crlSignerCertificate)
+	if err != nil {
+		return nil, err
+	}
+
+	// compare VID in message and Vendor account
 	if msg.Vid != signerAccount.VendorID {
 		return nil, pkitypes.NewErrMessageVidNotEqualAccountVid(msg.Vid, signerAccount.VendorID)
 	}
@@ -119,7 +125,7 @@ func (k msgServer) checkRootCert(ctx sdk.Context, crlSignerCertificate *x509.Cer
 
 func (k msgServer) checkCRLSignerNonRootCert(ctx sdk.Context, crlSignerCertificate *x509.Certificate, crlSignerDelegator string, isPAA bool) error {
 	if crlSignerDelegator != "" && !isPAA {
-		crlSignerDelegatorCert, err := x509.DecodeX509Certificate(crlSignerDelegator)
+		crlSignerDelegatorCert, err := x509.ParseAndValidateCertificate(crlSignerDelegator)
 		if err != nil {
 			return pkitypes.NewErrInvalidCertificate(err)
 		}
