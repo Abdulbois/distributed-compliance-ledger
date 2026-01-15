@@ -18,7 +18,7 @@ func TestHandler_UpdateRevocationPointForSameCertificateWithDifferentWhitespaces
 	vendorAcc := setup.CreateVendorAccount(65521)
 
 	// propose x509 root certificate by account Trustee1
-	proposeAddX509RootCert := types.NewMsgProposeAddX509RootCert(setup.Trustee1.String(), testconstants.PAACertWithNumericVid, testconstants.Info, testconstants.Vid, testconstants.CertSchemaVersion)
+	proposeAddX509RootCert := types.NewMsgProposeAddX509RootCert(setup.Trustee1.String(), testconstants.PAACertWithNumericVid, testconstants.Info, testconstants.PAACertWithNumericVidVid, testconstants.CertSchemaVersion)
 	_, err := setup.Handler(setup.Ctx, proposeAddX509RootCert)
 	require.NoError(t, err)
 
@@ -32,7 +32,6 @@ func TestHandler_UpdateRevocationPointForSameCertificateWithDifferentWhitespaces
 		Signer:               vendorAcc.String(),
 		Vid:                  testconstants.PAACertWithNumericVidVid,
 		IsPAA:                true,
-		Pid:                  8,
 		CrlSignerCertificate: testconstants.PAACertWithNumericVid,
 		Label:                "label",
 		DataURL:              testconstants.DataURL + "/1",
@@ -764,7 +763,7 @@ func TestHandler_UpdatePkiRevocationDistributionPoint_PAIWithoutPid(t *testing.T
 	rootCertOptions := utils.CreatePAACertNoVidOptions(testconstants.Vid)
 	utils.ProposeAndApproveRootCertificateByOptions(setup, setup.Trustee1, rootCertOptions)
 
-	addPkiRevocationDistributionPoint := createAddRevocationMessageWithPAICertWithVidPid(vendorAcc.String())
+	addPkiRevocationDistributionPoint := createAddRevocationMessageWithPAICertWithVid(vendorAcc.String())
 	addPkiRevocationDistributionPoint.Pid = 0
 	_, err := setup.Handler(setup.Ctx, addPkiRevocationDistributionPoint)
 	require.NoError(t, err)
@@ -856,8 +855,7 @@ func TestHandler_UpdatePkiRevocationDistributionPoint_CrlSignerCertificateField(
 			rootCertOptions2: utils.CreateRootWithVidOptions(),
 			addRevocation: &types.MsgAddPkiRevocationDistributionPoint{
 				Signer:               vendorAcc.String(),
-				IsPAA:                true,
-				CrlSignerCertificate: testconstants.IntermediateCertPem,
+				CrlSignerCertificate: testconstants.IntermediateCertWithoutVidPid,
 				Label:                label,
 				DataURL:              testconstants.DataURL,
 				IssuerSubjectKeyID:   testconstants.RootSubjectKeyIDWithoutColumns,
