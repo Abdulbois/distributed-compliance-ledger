@@ -38,6 +38,7 @@ func (k msgServer) ProposeAddX509RootCert(goCtx context.Context, msg *types.MsgP
 	if err != nil {
 		return nil, pkitypes.NewErrInvalidVidFormat(err)
 	}
+
 	if subjectVid != 0 && subjectVid != msg.Vid {
 		return nil, pkitypes.NewErrCertificateVidNotEqualMsgVid(fmt.Sprintf("Certificate VID=%d is not equal to the msg VID=%d", subjectVid, msg.Vid))
 	}
