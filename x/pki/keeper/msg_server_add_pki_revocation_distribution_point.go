@@ -35,7 +35,7 @@ func (k msgServer) AddPkiRevocationDistributionPoint(goCtx context.Context, msg 
 	}
 
 	// verify CrlSignerCertificate
-	err = verifyCrlSignerCertificate(crlSignerCertificate, msg)
+	err = VerifyCrlSignerCertificate(crlSignerCertificate, msg)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func (k msgServer) checkCRLSignerNonRootCert(ctx sdk.Context, crlSignerCertifica
 	return nil
 }
 
-func verifyCrlSignerCertificate(cert *x509.Certificate, msg *types.MsgAddPkiRevocationDistributionPoint) error {
+func VerifyCrlSignerCertificate(cert *x509.Certificate, msg *types.MsgAddPkiRevocationDistributionPoint) error {
 	if msg.IsPAA {
 		return verifyPAA(cert, msg)
 	}
