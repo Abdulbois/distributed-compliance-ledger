@@ -192,7 +192,7 @@ func (k msgServer) verifyUpdatedPAI(ctx sdk.Context, newCertificatePem, newDeleg
 
 	// Check for static validation when CRL Signer is a Leaf certificate
 	if revocationPoint.IsPAA || revocationPoint.CrlSignerDelegator != "" {
-		err = types.VerifyCRLSignerCertFormat(newCertificate)
+		err = VerifyCRLSignerCertFormat(newCertificate)
 		if err != nil {
 			return err
 		}
