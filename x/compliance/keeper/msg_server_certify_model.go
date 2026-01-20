@@ -11,7 +11,6 @@ import (
 
 	"github.com/zigbee-alliance/distributed-compliance-ledger/x/compliance/types"
 	dclauthtypes "github.com/zigbee-alliance/distributed-compliance-ledger/x/dclauth/types"
-	modeltypes "github.com/zigbee-alliance/distributed-compliance-ledger/x/model/types"
 )
 
 func (k msgServer) CertifyModel(goCtx context.Context, msg *types.MsgCertifyModel) (*types.MsgCertifyModelResponse, error) {
@@ -31,19 +30,16 @@ func (k msgServer) CertifyModel(goCtx context.Context, msg *types.MsgCertifyMode
 		)
 	}
 
-	// The corresponding Model Version must be present on ledger.
 	modelVersion, found := k.modelKeeper.GetModelVersion(ctx, msg.Vid, msg.Pid, msg.SoftwareVersion)
-	if !found {
-		return nil, modeltypes.NewErrModelVersionDoesNotExist(msg.Vid, msg.Pid, msg.SoftwareVersion)
-	}
+	if found {
+		// check if softwareVersionString matches with what is stored for the given version
+		if modelVersion.SoftwareVersionString != msg.SoftwareVersionString {
+			return nil, types.NewErrModelVersionStringDoesNotMatch(msg.Vid, msg.Pid, msg.SoftwareVersion, msg.SoftwareVersionString)
+		}
 
-	// check if softwareVersionString matches with what is stored for the given version
-	if modelVersion.SoftwareVersionString != msg.SoftwareVersionString {
-		return nil, types.NewErrModelVersionStringDoesNotMatch(msg.Vid, msg.Pid, msg.SoftwareVersion, msg.SoftwareVersionString)
-	}
-
-	if modelVersion.CdVersionNumber != int32(msg.CDVersionNumber) {
-		return nil, types.NewErrModelVersionCDVersionNumberDoesNotMatch(msg.Vid, msg.Pid, msg.SoftwareVersion, msg.CDVersionNumber)
+		if modelVersion.CdVersionNumber != int32(msg.CDVersionNumber) {
+			return nil, types.NewErrModelVersionCDVersionNumberDoesNotMatch(msg.Vid, msg.Pid, msg.SoftwareVersion, msg.CDVersionNumber)
+		}
 	}
 
 	complianceInfo, found := k.GetComplianceInfo(ctx, msg.Vid, msg.Pid, msg.SoftwareVersion, msg.CertificationType)
