@@ -37,10 +37,40 @@ sv=$RANDOM
 svs=$RANDOM
 certification_type_zb="zigbee"
 certification_type_matter="matter"
+certification_date="2020-01-02T02:20:20Z"
+certification_reason="some reason"
+cd_certificate_id="1"
+schema_version_0=0
+
+test_divider
+
+echo "Certify Model with VID: $vid PID: $pid SV: ${sv} for Matter when Model Version does not exist yet"
+result=$(echo "$passphrase" | dcld tx compliance certify-model --vid=$vid --pid=$pid --softwareVersion=$sv --softwareVersionString=$svs --certificationType="$certification_type_matter" --certificationDate="$certification_date" --reason "$certification_reason" --cdCertificateId="$cd_certificate_id" --cdVersionNumber=1 --from $zb_account --yes)
+result=$(get_txn_result "$result")
+check_response "$result" "\"code\": 0"
+echo "$result"
+
+test_divider
+
+echo "Get Device Software Compliance with CDCertificateID: {$cd_certificate_id}"
+result=$(dcld query compliance device-software-compliance --cdCertificateId="$cd_certificate_id")
+check_response "$result" "\"vid\": $vid"
+check_response "$result" "\"pid\": $pid"
+check_response "$result" "\"softwareVersion\": $sv"
+check_response "$result" "\"softwareVersionString\": \"$svs\""
+check_response "$result" "\"certificationType\": \"$certification_type_matter\""
+check_response "$result" "\"date\": \"$certification_date\""
+check_response "$result" "\"reason\": \"$certification_reason\""
+check_response "$result" "\"cDCertificateId\": \"$cd_certificate_id\""
+
+test_divider
+
+pid=$RANDOM
+sv=$RANDOM
+svs=$RANDOM
 provision_date="2020-02-02T02:20:20Z"
 provision_reason="some reason"
 cd_certificate_id="123"
-schema_version_0=0
 
 test_divider
 
