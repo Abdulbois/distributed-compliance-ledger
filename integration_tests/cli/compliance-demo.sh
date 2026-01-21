@@ -45,12 +45,26 @@ matter_certification_type="matter"
 cd_certificate_id="123"
 cd_version_number=1
 schema_version_0=0
+
 echo "Certify unknown Model with VID: $vid PID: $pid  SV: ${sv} with zigbee certification"
 result=$(echo "$passphrase" | dcld tx compliance certify-model --vid=$vid --pid=$pid --softwareVersion=$sv --softwareVersionString=$svs --certificationType="$zigbee_certification_type" --certificationDate="$certification_date" --cdCertificateId="$cd_certificate_id" --from $zb_account --yes)
 result=$(get_txn_result "$result")
 echo "$result"
-check_response "$result" "\"code\": 517"
-check_response "$result" "No model version"
+check_response "$result" "\"code\": 0"
+
+echo "Get Device Software Compliance with CDCertificateID: {$cd_certificate_id}"
+result=$(dcld query compliance device-software-compliance --cdCertificateId="$cd_certificate_id")
+check_response "$result" "\"vid\": $vid"
+check_response "$result" "\"pid\": $pid"
+check_response "$result" "\"softwareVersion\": $sv"
+check_response "$result" "\"softwareVersionString\": \"$svs\""
+check_response "$result" "\"certificationType\": \"$zigbee_certification_type\""
+check_response "$result" "\"date\": \"$certification_date\""
+check_response "$result" "\"cDCertificateId\": \"$cd_certificate_id\""
+
+echo "Delete compliance info vid=$vid pid=$pid softwareVersion=$sv certificationType=$zigbee_certification_type"
+result=$(echo "$passphrase" | dcld tx compliance delete-compliance-info --vid=$vid --pid=$pid --softwareVersion=$sv --certificationType=$zigbee_certification_type --from=$zb_account --yes)
+result=$(get_txn_result "$result")
 
 test_divider
 
@@ -59,15 +73,6 @@ result=$(echo "$passphrase" | dcld tx model add-model --vid=$vid --pid=$pid --de
 result=$(get_txn_result "$result")
 echo $result
 check_response "$result" "\"code\": 0"
-
-test_divider
-
-echo "Certify unknown Model Version with VID: $vid PID: $pid  SV: ${sv} with zigbee certification"
-result=$(echo "$passphrase" | dcld tx compliance certify-model --vid=$vid --pid=$pid --softwareVersion=$sv --softwareVersionString=$svs --certificationType="$zigbee_certification_type" --certificationDate="$certification_date" --cdCertificateId="$cd_certificate_id" --from $zb_account --yes)
-result=$(get_txn_result "$result")
-echo "$result"
-check_response "$result" "\"code\": 517"
-check_response "$result" "No model version"
 
 test_divider
 

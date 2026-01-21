@@ -54,15 +54,6 @@ check_response "$result" "\"code\": 0"
 
 test_divider
 
-echo "Certify unknown Model Version with VID: $vid_in_hex_format PID: $pid_in_hex_format  SV: ${sv} with zigbee certification"
-result=$(echo "$passphrase" | dcld tx compliance certify-model --vid=$vid_in_hex_format --pid=$pid_in_hex_format --softwareVersion=$sv --softwareVersionString=$svs --certificationType="$zigbee_certification_type" --certificationDate="$certification_date" --cdCertificateId="$cd_certificate_id" --from $zb_account --yes)
-result=$(get_txn_result "$result")
-echo "$result"
-check_response "$result" "\"code\": 517"
-check_response "$result" "No model version"
-
-test_divider
-
 echo "Add Model Version with VID: $vid_in_hex_format PID: $pid_in_hex_format SV: $sv SoftwareVersionString:$svs"
 result=$(echo '$passphrase' | dcld tx model add-model-version --cdVersionNumber=1 --maxApplicableSoftwareVersion=10 --minApplicableSoftwareVersion=1 --vid=$vid_in_hex_format --pid=$pid_in_hex_format --softwareVersion=$sv --softwareVersionString=$svs --from=$vendor_account --yes)
 result=$(get_txn_result "$result")
