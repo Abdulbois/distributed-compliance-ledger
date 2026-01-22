@@ -943,6 +943,7 @@ func DemoTrackCompliance(suite *utils.TestSuite) {
 	require.Equal(suite.T, certReason, deviceSoftwareCompliance.ComplianceInfo[0].Reason)
 	require.Equal(suite.T, certDate, deviceSoftwareCompliance.ComplianceInfo[0].Date)
 
+	inputAllComplianceInfo, _ = GetAllComplianceInfo(suite)
 	pid = int32(tmrand.Uint16())
 	sv = tmrand.Uint32()
 	svs = utils.RandString()
