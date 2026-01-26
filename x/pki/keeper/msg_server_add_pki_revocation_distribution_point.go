@@ -275,7 +275,7 @@ func VerifyCRLSignerCertFormat(certificate *x509.Certificate) error {
 		)
 	}
 
-	// Key Usage extension should be marked critical
+	// Basic Constraint extension should be marked critical
 	isCritical := false
 	for _, ext := range cert.Extensions {
 		if ext.Id.Equal(oidKeyUsage) {
