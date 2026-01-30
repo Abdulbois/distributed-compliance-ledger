@@ -242,7 +242,7 @@ func VerifyCRLSignerCertFormat(certificate *x509.Certificate) error {
 
 	cert := certificate.Certificate
 	if cert.Version != 3 {
-		return pkitypes.NewErrCRLSignerCertificateInvalidFormat(
+		return pkitypes.NewErrCRLSignerCertificateInvalidVersion(
 			"The version field SHALL be set to 2 to indicate v3 certificate",
 		)
 	}

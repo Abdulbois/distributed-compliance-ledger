@@ -53,6 +53,7 @@ var (
 	ErrCertVidNotEqualToRootVid                          = errors.Register(ModuleName, 440, "certificate's vid is not equal to vid of root certificate ")
 	ErrCRLSignerCertificateInvalidFormat                 = errors.Register(ModuleName, 441, "invalid CRLSignerCertificate certificate")
 	ErrInvalidAuthorityKeyIDFormat                       = errors.Register(ModuleName, 442, "invalid AuthorityKeyID format")
+	ErrCRLSignerCertificateInvalidVersion                = errors.Register(ModuleName, 443, "invalid CRLSignerCertificate version")
 )
 
 func NewErrUnauthorizedRole(transactionName string, requiredRole types.AccountRole) error {
@@ -263,6 +264,13 @@ func NewErrRevokeCertVidNotEqualToAccountVid(rootVID int32, accountVID int32) er
 func NewErrCRLSignerCertificateInvalidFormat(description string) error {
 	return errors.Wrapf(
 		ErrCRLSignerCertificateInvalidFormat, "Invalid CRL Signer Certificate format: %v",
+		description,
+	)
+}
+
+func NewErrCRLSignerCertificateInvalidVersion(description string) error {
+	return errors.Wrapf(
+		ErrCRLSignerCertificateInvalidVersion, "Invalid CRL Signer Certificate version: %v",
 		description,
 	)
 }

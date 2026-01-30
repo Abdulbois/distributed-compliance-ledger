@@ -33,7 +33,7 @@ func TestMsgAddPkiRevocationDistributionPoint_verifyCRLCertFormat(t *testing.T) 
 			init: func(certificate *x509.Certificate) {
 				certificate.Certificate.Version = 2
 			},
-			err: pkitypes.ErrCRLSignerCertificateInvalidFormat,
+			err: pkitypes.ErrCRLSignerCertificateInvalidVersion,
 		},
 		{
 			name: "SignatureAlgorithm is not ECDSAWithSHA256",
