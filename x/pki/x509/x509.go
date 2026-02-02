@@ -47,7 +47,9 @@ const (
 	MaxSubjectFields = 50
 )
 
-func DecodeX509Certificate(pemCertificate string) (*Certificate, error) {
+type DecodeX509CertVerificationOptions func(cert *x509.Certificate) error
+
+func DecodeX509Certificate(pemCertificate string, options ...DecodeX509CertVerificationOptions) (*Certificate, error) {
 	block, _ := pem.Decode([]byte(pemCertificate))
 	if block == nil {
 		return nil, pkitypes.NewErrInvalidCertificate("Could not decode pem certificate")
@@ -56,6 +58,13 @@ func DecodeX509Certificate(pemCertificate string) (*Certificate, error) {
 	cert, err := x509.ParseCertificate(block.Bytes)
 	if err != nil {
 		return nil, pkitypes.NewErrInvalidCertificate(fmt.Sprintf("Could not parse certificate: %v", err.Error()))
+	}
+
+	for _, option := range options {
+		err = option(cert)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	certificate := Certificate{
@@ -221,8 +230,27 @@ func ParseAndValidateCertificate(pemCertificate string) (*Certificate, error) {
 		return nil, pkitypes.NewErrInvalidCertificate(fmt.Sprintf("certificate size (%d bytes) exceeds maximum limit of %d bytes", len(pemCertificate), MaxCertSize))
 	}
 
+	serialNumberVerification := func(cert *x509.Certificate) error {
+		serial := cert.SerialNumber
+		// RFC 5280 requires serial numbers to be positive
+		if serial.Sign() <= 0 {
+			return pkitypes.NewErrInvalidCertificate("Serial number must be a positive")
+		}
+
+		// Check for the 20-octet limit (160 bits)
+		// In ASN.1 DER encoding, if the most significant bit of the integer
+		// is 1, a leading zero byte (0x00) is added to keep it positive.
+		// To ensure the TOTAL encoding is <= 20 octets, the bit length
+		// must be 159 bits or fewer.
+		if serial.BitLen() > 159 {
+			return pkitypes.NewErrInvalidCertificate("Serial number exceeds 20-octet DER encoding limit")
+		}
+
+		return nil
+	}
+
 	// Parse the certificate
-	cert, err := DecodeX509Certificate(pemCertificate)
+	cert, err := DecodeX509Certificate(pemCertificate, serialNumberVerification)
 	if err != nil {
 		return nil, pkitypes.NewErrInvalidCertificate(fmt.Sprintf("failed to parse certificate: %v", err))
 	}
