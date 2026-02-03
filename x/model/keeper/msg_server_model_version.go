@@ -44,6 +44,18 @@ func (k msgServer) CreateModelVersion(goCtx context.Context, msg *types.MsgCreat
 		return nil, types.NewErrModelVersionAlreadyExists(msg.Vid, msg.Pid, msg.SoftwareVersion)
 	}
 
+	// check if compliance info exists, if yes, check if it matches the msg's SoftwareVersionString and CdVersionNumber
+	complianceInfo, found := k.GetComplianceInfo(ctx, msg.Vid, msg.Pid, msg.SoftwareVersion)
+	if found {
+		if complianceInfo.SoftwareVersionString != msg.SoftwareVersionString {
+			return nil, types.NewErrModelVersionStringDoesNotMatch(msg.Vid, msg.Pid, msg.SoftwareVersion, msg.SoftwareVersionString)
+		}
+
+		if int32(complianceInfo.CDVersionNumber) != msg.CdVersionNumber {
+			return nil, types.NewErrModelVersionCDVersionNumberDoesNotMatch(msg.Vid, msg.Pid, msg.SoftwareVersion, msg.CdVersionNumber)
+		}
+	}
+
 	modelVersion := types.ModelVersion{
 		Creator:                      msg.Creator,
 		Vid:                          msg.Vid,
@@ -169,7 +181,7 @@ func (k msgServer) DeleteModelVersion(goCtx context.Context, msg *types.MsgDelet
 		return nil, types.NewErrModelVersionDoesNotExist(msg.Vid, msg.Pid, msg.SoftwareVersion)
 	}
 
-	isCertified := k.IsComplianceInfoPresent(ctx, msg.Vid, msg.Pid, msg.SoftwareVersion)
+	_, isCertified := k.GetComplianceInfo(ctx, msg.Vid, msg.Pid, msg.SoftwareVersion)
 	if isCertified {
 		return nil, types.NewErrModelVersionDeletionCertified(msg.Vid, msg.Pid, modelVersion.SoftwareVersion)
 	}
@@ -181,15 +193,15 @@ func (k msgServer) DeleteModelVersion(goCtx context.Context, msg *types.MsgDelet
 	return &types.MsgDeleteModelVersionResponse{}, nil
 }
 
-// Returns true if there is a Compliance Info in any status (Certified, Revoked, Provisioned, etc.)
-func (k msgServer) IsComplianceInfoPresent(ctx sdk.Context, vid int32, pid int32, softwareVersion uint32) bool {
+// GetComplianceInfo retrieves compliance information for a specific device identified by vid, pid, and softwareVersion.
+func (k msgServer) GetComplianceInfo(ctx sdk.Context, vid int32, pid int32, softwareVersion uint32) (*dclcompltypes.ComplianceInfo, bool) {
 	certificationTypes := dclcompltypes.CertificationTypesList
 	for _, certType := range certificationTypes {
-		_, isFound := k.complianceKeeper.GetComplianceInfo(ctx, vid, pid, softwareVersion, certType)
+		complianceInfo, isFound := k.complianceKeeper.GetComplianceInfo(ctx, vid, pid, softwareVersion, certType)
 		if isFound {
-			return true
+			return &complianceInfo, true
 		}
 	}
 
-	return false
+	return nil, false
 }
