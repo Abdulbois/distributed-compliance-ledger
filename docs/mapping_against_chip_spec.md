@@ -1,4 +1,4 @@
-This document describes how to map schemas (DCL main records/entities) against the [CHIP](https://github.com/CHIP-Specifications/connectedhomeip-spec/blob/master/src/service_device_management/DistributedComplianceLedger.adoc) specification.
+This document describes how to map schemas (DCL main records/entities) against the CHIP specification.
 
 
 ## PKI Module
