@@ -25,6 +25,8 @@ vendor_account=vendor_account_$vid
 echo "Create Vendor account - $vendor_account"
 create_new_vendor_account $vendor_account $vid
 
+echo "Create CertificationCenter account"
+create_new_account zb_account "CertificationCenter"
 
 # Create a new model version
 echo "Add Model with VID: $vid PID: $pid"
@@ -36,6 +38,13 @@ test_divider
 
 sv=$RANDOM
 schema_version_0=0
+
+echo "Certify  Model with VID: $vid PID: $pid  SV: ${sv} with zigbee certification"
+result=$(echo "test1234" | dcld tx compliance certify-model --vid=$vid --pid=$pid --softwareVersion=$sv --cdVersionNumber=1 --softwareVersionString=1 --cdCertificateId=1 --certificationType=zigbee --certificationDate="2020-01-01T00:00:01Z" --from $zb_account --yes)
+result=$(get_txn_result "$result")
+echo "$result"
+check_response "$result" "\"code\": 0"
+
 echo "Create a Device Model Version with VID: $vid PID: $pid SV: $sv"
 result=$(echo 'test1234' | dcld tx model add-model-version --cdVersionNumber=1 --maxApplicableSoftwareVersion=10 --minApplicableSoftwareVersion=1 --vid=$vid --pid=$pid --softwareVersion=$sv --softwareVersionString=1   --schemaVersion=$schema_version_0 --from=$vendor_account --yes)
 result=$(get_txn_result "$result")
