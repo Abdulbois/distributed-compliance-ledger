@@ -152,7 +152,7 @@ func NewErrEnhancedSetupFlowTCRevisionInvalidIncrement(newEnhancedSetupFlowTCRev
 		"EnhancedSetupFlowTCRevision %v is not correctly incremented to %v", prevEnhancedSetupFlowTCRevision, newEnhancedSetupFlowTCRevision)
 }
 
-func NewErrModelVersionStringDoesNotMatch(vid interface{}, pid interface{},
+func NewErrComplianceInfoSoftwareVersionStringDoesNotMatch(vid interface{}, pid interface{},
 	softwareVersion interface{}, softwareVersionString interface{},
 ) error {
 	return errors.Wrapf(
@@ -163,7 +163,7 @@ func NewErrModelVersionStringDoesNotMatch(vid interface{}, pid interface{},
 	)
 }
 
-func NewErrModelVersionCDVersionNumberDoesNotMatch(vid interface{}, pid interface{},
+func NewErrComplianceInfoCDVersionNumberDoesNotMatch(vid interface{}, pid interface{},
 	softwareVersion interface{}, cDVersionNumber interface{},
 ) error {
 	return errors.Wrapf(

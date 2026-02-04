@@ -48,11 +48,11 @@ func (k msgServer) CreateModelVersion(goCtx context.Context, msg *types.MsgCreat
 	complianceInfo, found := k.GetComplianceInfo(ctx, msg.Vid, msg.Pid, msg.SoftwareVersion)
 	if found {
 		if complianceInfo.SoftwareVersionString != msg.SoftwareVersionString {
-			return nil, types.NewErrModelVersionStringDoesNotMatch(msg.Vid, msg.Pid, msg.SoftwareVersion, msg.SoftwareVersionString)
+			return nil, types.NewErrComplianceInfoSoftwareVersionStringDoesNotMatch(msg.Vid, msg.Pid, msg.SoftwareVersion, msg.SoftwareVersionString)
 		}
 
 		if int32(complianceInfo.CDVersionNumber) != msg.CdVersionNumber {
-			return nil, types.NewErrModelVersionCDVersionNumberDoesNotMatch(msg.Vid, msg.Pid, msg.SoftwareVersion, msg.CdVersionNumber)
+			return nil, types.NewErrComplianceInfoCDVersionNumberDoesNotMatch(msg.Vid, msg.Pid, msg.SoftwareVersion, msg.CdVersionNumber)
 		}
 	}
 
