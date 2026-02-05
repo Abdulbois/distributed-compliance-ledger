@@ -11,6 +11,8 @@ Attests compliance of the Model Version to the ZB or Matter standard.
 `REVOKE_MODEL_CERTIFICATION` should be used for revoking (disabling) the compliance.
 It's possible to call `CERTIFY_MODEL` for revoked model versions to enable them back.
 
+The corresponding Model and Model Version are not required to be present in the ledger. It can be added later by Vendors.
+
 It must be called for every compliant device for use cases where compliance
 is tracked on ledger.
 
