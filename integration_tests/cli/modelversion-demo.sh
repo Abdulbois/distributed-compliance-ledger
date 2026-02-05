@@ -162,6 +162,11 @@ result=$(echo 'test1234' | dcld tx model update-model-version --vid=$vid --pid=$
 result=$(get_txn_result "$result")
 check_response_and_report "$result" "transaction should be signed by a vendor account containing the vendorID $vid"
 
+# Delete corresponding compliance info
+echo "Delete compliance info vid=$vid pid=$pid softwareVersion=$sv certificationType=zigbee"
+result=$(echo 'test1234' | dcld tx compliance delete-compliance-info --vid=$vid --pid=$pid --softwareVersion=$sv --certificationType=zigbee --from=$zb_account --yes)
+result=$(get_txn_result "$result")
+
 # Delete existing model version
 echo "Delete a Device Model Version with VID: $vid PID: $pid SV: $sv"
 result=$(echo 'test1234' | dcld tx model delete-model-version --vid=$vid --pid=$pid --softwareVersion=$sv --from=$vendor_account --yes)
