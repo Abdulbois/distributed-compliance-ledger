@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -28,9 +29,18 @@ func (k msgServer) ProposeAddX509RootCert(goCtx context.Context, msg *types.MsgP
 	}
 
 	// decode pem certificate
-	x509Certificate, err := x509.DecodeX509Certificate(msg.Cert)
+	x509Certificate, err := x509.ParseAndValidateCertificate(msg.Cert)
 	if err != nil {
 		return nil, pkitypes.NewErrInvalidCertificate(err)
+	}
+
+	subjectVid, err := x509.GetVidFromSubject(x509Certificate.SubjectAsText)
+	if err != nil {
+		return nil, pkitypes.NewErrInvalidVidFormat(err)
+	}
+
+	if subjectVid != 0 && subjectVid != msg.Vid {
+		return nil, pkitypes.NewErrCertificateVidNotEqualMsgVid(fmt.Sprintf("Certificate VID=%d is not equal to the msg VID=%d", subjectVid, msg.Vid))
 	}
 
 	// fail if certificate is not self-signed

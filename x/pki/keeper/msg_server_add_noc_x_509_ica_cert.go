@@ -25,7 +25,7 @@ func (k msgServer) AddNocX509IcaCert(goCtx context.Context, msg *types.MsgAddNoc
 	}
 
 	// decode pem certificate
-	x509Certificate, err := x509.DecodeX509Certificate(msg.Cert)
+	x509Certificate, err := x509.ParseAndValidateCertificate(msg.Cert)
 	if err != nil {
 		return nil, pkitypes.NewErrInvalidCertificate(err)
 	}

@@ -327,3 +327,17 @@ func TestHandler_ProposeAddDaRootCert_ForDifferentSigner(t *testing.T) {
 	require.Error(t, err)
 	require.True(t, sdkerrors.ErrUnauthorized.Is(err))
 }
+
+func TestHandler_ProposeAddDaRootCert_WithDifferentVid(t *testing.T) {
+	setup := utils.Setup(t)
+
+	proposeAddX509RootCert := types.NewMsgProposeAddX509RootCert(
+		setup.Trustee2.String(),
+		testconstants.PAACertWithNumericVid,
+		testconstants.Info,
+		testconstants.Vid,
+		testconstants.CertSchemaVersion)
+
+	_, err := setup.Handler(setup.Ctx, proposeAddX509RootCert)
+	require.ErrorIs(t, err, pkitypes.ErrCertificateVidNotEqualMsgVid)
+}

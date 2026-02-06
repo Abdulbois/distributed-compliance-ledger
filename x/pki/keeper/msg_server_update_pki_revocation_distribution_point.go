@@ -103,7 +103,7 @@ func (k msgServer) verifyUpdatedCertificate(ctx sdk.Context, newCertificatePem, 
 
 func (k msgServer) verifyUpdatedPAA(ctx sdk.Context, newCertificatePem string, revocationPoint *types.PkiRevocationDistributionPoint) error {
 	// decode new cert
-	newCertificate, err := x509.DecodeX509Certificate(newCertificatePem)
+	newCertificate, err := x509.ParseAndValidateCertificate(newCertificatePem)
 	if err != nil {
 		return pkitypes.NewErrInvalidCertificate(err)
 	}
@@ -159,7 +159,7 @@ func (k msgServer) verifyUpdatedPAA(ctx sdk.Context, newCertificatePem string, r
 
 func (k msgServer) verifyUpdatedPAI(ctx sdk.Context, newCertificatePem, newDelegatorCertPem string, revocationPoint *types.PkiRevocationDistributionPoint) error {
 	// decode new cert
-	newCertificate, err := x509.DecodeX509Certificate(newCertificatePem)
+	newCertificate, err := x509.ParseAndValidateCertificate(newCertificatePem)
 	if err != nil {
 		return pkitypes.NewErrInvalidCertificate(err)
 	}
@@ -192,7 +192,7 @@ func (k msgServer) verifyUpdatedPAI(ctx sdk.Context, newCertificatePem, newDeleg
 
 	// Check for static validation when CRL Signer is a Leaf certificate
 	if revocationPoint.IsPAA || revocationPoint.CrlSignerDelegator != "" {
-		err = types.VerifyCRLSignerCertFormat(newCertificate)
+		err = VerifyCRLSignerCertFormat(newCertificate)
 		if err != nil {
 			return err
 		}

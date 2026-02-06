@@ -153,7 +153,7 @@ func Test_FormatVID(t *testing.T) {
 		newKey string
 		result string
 	}{
-		// set incorrect header
+		// set an incorrect header
 		{
 			header: "CN=Matter PAA 1,O=Google,C=US,1.3.6=#130436303036",
 			oldKey: "1.3.6.1.4.1.37244.2.1",
@@ -223,5 +223,106 @@ func Test_FormatPID(t *testing.T) {
 	for _, tt := range negativeTests {
 		result := FormatOID(tt.header, tt.oldKey, tt.newKey)
 		require.Equal(t, result, tt.result)
+	}
+}
+
+func Test_ParseAndValidateCertificate(t *testing.T) {
+	positiveTests := []struct {
+		name            string
+		certPem         string
+		expectedSubject string
+		expectedKeyID   string
+		isSelfSigned    bool
+	}{
+		{
+			name:            "valid leaf certificate",
+			certPem:         testconstants.LeafCertPem,
+			expectedSubject: testconstants.LeafSubject,
+			expectedKeyID:   testconstants.LeafSubjectKeyID,
+			isSelfSigned:    false,
+		},
+		{
+			name:            "valid intermediate certificate",
+			certPem:         testconstants.IntermediateCertPem,
+			expectedSubject: testconstants.IntermediateSubject,
+			expectedKeyID:   testconstants.IntermediateSubjectKeyID,
+			isSelfSigned:    false,
+		},
+		{
+			name:            "valid root certificate",
+			certPem:         testconstants.RootCertPem,
+			expectedSubject: testconstants.RootSubject,
+			expectedKeyID:   testconstants.RootSubjectKeyID,
+			isSelfSigned:    true,
+		},
+		{
+			name:            "valid Google certificate with VID",
+			certPem:         testconstants.GoogleCertPem,
+			expectedSubject: testconstants.GoogleSubject,
+			expectedKeyID:   testconstants.GoogleSubjectKeyID,
+			isSelfSigned:    true,
+		},
+		{
+			name:            "valid PAA certificate with VID",
+			certPem:         testconstants.PAACertWithNumericVid,
+			expectedSubject: testconstants.PAACertWithNumericVidSubject,
+			expectedKeyID:   testconstants.PAACertWithNumericVidSubjectKeyID,
+			isSelfSigned:    true,
+		},
+		{
+			name:            "valid PAI certificate with VID",
+			certPem:         testconstants.PAICertWithNumericVid,
+			expectedSubject: testconstants.PAICertWithNumericVidSubject,
+			expectedKeyID:   testconstants.PAICertWithNumericVidSubjectKeyID,
+			isSelfSigned:    false,
+		},
+	}
+
+	negativeTests := []struct {
+		name              string
+		certPem           string
+		expectErrorSubstr string
+	}{
+		{
+			name:              "empty certificate string",
+			certPem:           "",
+			expectErrorSubstr: "failed to parse certificate",
+		},
+		{
+			name:              "malformed PEM certificate",
+			certPem:           "-----BEGIN CERTIFICATE-----\nInvalidData\n-----END CERTIFICATE-----",
+			expectErrorSubstr: "failed to parse certificate",
+		},
+		{
+			name: "certificate size exceeds 100 KB",
+			certPem: func() string {
+				largeCert := "-----BEGIN CERTIFICATE-----\n"
+				for i := 0; i < 1600; i++ {
+					largeCert += "MIIEFzCCAv+gAwIBAgIUAPsN44tYPowXpX0cqFu8p0hcLqAwDQYJKoZIhvcNAQEL\n"
+				}
+				largeCert += "-----END CERTIFICATE-----"
+
+				return largeCert
+			}(),
+			expectErrorSubstr: "exceeds maximum limit",
+		},
+	}
+
+	for _, tt := range positiveTests {
+		certificate, err := ParseAndValidateCertificate(tt.certPem)
+		require.NoError(t, err)
+		require.NotNil(t, certificate)
+		require.Equal(t, tt.expectedSubject, certificate.Subject)
+		require.Equal(t, tt.expectedKeyID, certificate.SubjectKeyID)
+		require.Equal(t, tt.isSelfSigned, certificate.IsSelfSigned())
+	}
+
+	for _, tt := range negativeTests {
+		certificate, err := ParseAndValidateCertificate(tt.certPem)
+		require.Error(t, err)
+		require.Nil(t, certificate)
+		if tt.expectErrorSubstr != "" {
+			require.Contains(t, err.Error(), tt.expectErrorSubstr)
+		}
 	}
 }

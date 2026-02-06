@@ -26,16 +26,16 @@ import (
 )
 
 var (
-	uni *ut.UniversalTranslator
-	vl  *validator.Validate
+	vl    *validator.Validate
+	trans ut.Translator
 )
 
 //nolint:wrapcheck,errcheck
-func Validate(s interface{}) error {
+func init() {
 	en := en.New()
-	uni = ut.New(en, en)
+	uni := ut.New(en, en)
 
-	trans, _ := uni.GetTranslator("en")
+	trans, _ = uni.GetTranslator("en")
 
 	vl = validator.New()
 
@@ -156,7 +156,9 @@ func Validate(s interface{}) error {
 	})
 
 	vl.RegisterValidation("required_if_bit_0_set", requiredIfBit0Set)
+}
 
+func Validate(s interface{}) error {
 	//nolint:nestif
 	if errs := vl.Struct(s); errs != nil {
 		//nolint:errorlint

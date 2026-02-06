@@ -9,7 +9,6 @@ import (
 
 	testconstants "github.com/zigbee-alliance/distributed-compliance-ledger/integration_tests/constants"
 	"github.com/zigbee-alliance/distributed-compliance-ledger/testutil/sample"
-	pkitypes "github.com/zigbee-alliance/distributed-compliance-ledger/types/pki"
 	"github.com/zigbee-alliance/distributed-compliance-ledger/utils/validator"
 )
 
@@ -33,14 +32,6 @@ func TestMsgAddNocX509IcaCert_ValidateBasic(t *testing.T) {
 				Cert:   "",
 			},
 			err: validator.ErrRequiredFieldMissing,
-		},
-		{
-			name: "invalid certificate",
-			msg: MsgAddNocX509IcaCert{
-				Signer: sample.AccAddress(),
-				Cert:   testconstants.StubCertPem,
-			},
-			err: pkitypes.ErrInvalidCertificate,
 		},
 		{
 			name: "cert len > 10485760",
