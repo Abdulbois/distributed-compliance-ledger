@@ -22,7 +22,7 @@ func TestHandler_RevocationPointsByIssuerSubjectKeyID(t *testing.T) {
 		setup.Trustee1.String(),
 		testconstants.PAACertWithNumericVid,
 		testconstants.Info,
-		testconstants.Vid,
+		testconstants.PAACertWithNumericVidVid,
 		testconstants.CertSchemaVersion)
 	_, err := setup.Handler(setup.Ctx, proposeAddX509RootCert)
 	require.NoError(t, err)
@@ -44,7 +44,6 @@ func TestHandler_RevocationPointsByIssuerSubjectKeyID(t *testing.T) {
 		Signer:               vendorAcc.String(),
 		Vid:                  testconstants.PAACertWithNumericVidVid,
 		IsPAA:                true,
-		Pid:                  8,
 		CrlSignerCertificate: testconstants.PAACertWithNumericVid,
 		Label:                "label",
 		DataURL:              testconstants.DataURL + "/1",
@@ -62,7 +61,6 @@ func TestHandler_RevocationPointsByIssuerSubjectKeyID(t *testing.T) {
 		Signer:               vendorAcc.String(),
 		Vid:                  testconstants.PAACertWithNumericVidVid,
 		IsPAA:                true,
-		Pid:                  8,
 		CrlSignerCertificate: testconstants.PAACertWithNumericVid,
 		Label:                "label1",
 		DataURL:              testconstants.DataURL + "/2",
@@ -114,7 +112,7 @@ func TestHandler_AddRevocationPointForSameCertificateWithDifferentWhitespaces(t 
 	vendorAcc := setup.CreateVendorAccount(65521)
 
 	// propose x509 root certificate by account Trustee1
-	proposeAddX509RootCert := types.NewMsgProposeAddX509RootCert(setup.Trustee1.String(), testconstants.PAACertWithNumericVid, testconstants.Info, testconstants.Vid, testconstants.CertSchemaVersion)
+	proposeAddX509RootCert := types.NewMsgProposeAddX509RootCert(setup.Trustee1.String(), testconstants.PAACertWithNumericVid, testconstants.Info, testconstants.PAACertWithNumericVidVid, testconstants.CertSchemaVersion)
 	_, err := setup.Handler(setup.Ctx, proposeAddX509RootCert)
 	require.NoError(t, err)
 
@@ -128,7 +126,6 @@ func TestHandler_AddRevocationPointForSameCertificateWithDifferentWhitespaces(t 
 		Signer:               vendorAcc.String(),
 		Vid:                  testconstants.PAACertWithNumericVidVid,
 		IsPAA:                true,
-		Pid:                  8,
 		CrlSignerCertificate: testconstants.PAACertWithNumericVidDifferentWhitespaces,
 		Label:                "label",
 		DataURL:              testconstants.DataURL + "/1",
@@ -386,17 +383,17 @@ func TestHandler_AddPkiRevocationDistributionPoint_PositiveCases(t *testing.T) {
 		},
 		{
 			name:            "CrlSignerDelegatedByPAI",
-			rootCertOptions: utils.CreateTestRootCertOptions(),
+			rootCertOptions: utils.CreateRootWithVidOptions(),
 			addRevocation: &types.MsgAddPkiRevocationDistributionPoint{
 				Signer:               vendorAcc.String(),
-				Vid:                  65522,
+				Vid:                  testconstants.LeafCertWithVidVid,
 				IsPAA:                false,
 				Pid:                  0,
-				CrlSignerCertificate: testconstants.LeafCertPem,
-				CrlSignerDelegator:   testconstants.IntermediateCertPem,
+				CrlSignerCertificate: testconstants.LeafCertWithVid,
+				CrlSignerDelegator:   testconstants.IntermediateCertWithVid1,
 				Label:                label,
 				DataURL:              testconstants.DataURL,
-				IssuerSubjectKeyID:   testconstants.RootSubjectKeyIDWithoutColumns,
+				IssuerSubjectKeyID:   testconstants.IntermediateCertWithVid1SubjectKeyIDWithoutColumns,
 				RevocationType:       types.CRLRevocationType,
 				SchemaVersion:        0,
 			},
@@ -404,13 +401,13 @@ func TestHandler_AddPkiRevocationDistributionPoint_PositiveCases(t *testing.T) {
 		},
 		{
 			name:            "CrlSignerDelegatedByPAA",
-			rootCertOptions: utils.CreateTestRootCertOptions(),
+			rootCertOptions: utils.CreatePAACertNoVidOptions(65522),
 			addRevocation: &types.MsgAddPkiRevocationDistributionPoint{
 				Signer:               vendorAcc.String(),
 				Vid:                  65522,
-				IsPAA:                true,
+				IsPAA:                false,
 				Pid:                  0,
-				CrlSignerCertificate: testconstants.IntermediateCertPem,
+				CrlSignerCertificate: testconstants.PAICertWithVid,
 				Label:                label,
 				DataURL:              testconstants.DataURL,
 				IssuerSubjectKeyID:   testconstants.RootSubjectKeyIDWithoutColumns,

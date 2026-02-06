@@ -70,11 +70,25 @@ func createAddRevocationMessageWithPAICertWithVidPid(signer string) *types.MsgAd
 	}
 }
 
+func createAddRevocationMessageWithPAICertWithVid(signer string) *types.MsgAddPkiRevocationDistributionPoint {
+	return &types.MsgAddPkiRevocationDistributionPoint{
+		Signer:               signer,
+		Vid:                  testconstants.PAICertWithVidVid,
+		IsPAA:                false,
+		CrlSignerCertificate: testconstants.PAICertWithVid,
+		Label:                label,
+		DataURL:              testconstants.DataURL,
+		IssuerSubjectKeyID:   testconstants.SubjectKeyIDWithoutColons,
+		RevocationType:       types.CRLRevocationType,
+		SchemaVersion:        0,
+	}
+}
+
 func createAddRevocationMessageWithPAACertNoVid(signer string, vid int32) *types.MsgAddPkiRevocationDistributionPoint {
 	return &types.MsgAddPkiRevocationDistributionPoint{
 		Signer:               signer,
 		Vid:                  vid,
-		IsPAA:                false,
+		IsPAA:                true,
 		Pid:                  0,
 		CrlSignerCertificate: testconstants.PAACertNoVid,
 		Label:                label,

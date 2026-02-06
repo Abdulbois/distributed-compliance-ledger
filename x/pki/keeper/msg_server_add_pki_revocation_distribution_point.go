@@ -2,6 +2,10 @@ package keeper
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	x509std "crypto/x509"
+	"encoding/asn1"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -14,12 +18,6 @@ import (
 func (k msgServer) AddPkiRevocationDistributionPoint(goCtx context.Context, msg *types.MsgAddPkiRevocationDistributionPoint) (*types.MsgAddPkiRevocationDistributionPointResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	// decode CrlSignerCertificate
-	crlSignerCertificate, err := x509.DecodeX509Certificate(msg.CrlSignerCertificate)
-	if err != nil {
-		return nil, pkitypes.NewErrInvalidCertificate(err)
-	}
-
 	// check if signer has vendor role
 	signerAddr, err := sdk.AccAddressFromBech32(msg.Signer)
 	if err != nil {
@@ -30,7 +28,19 @@ func (k msgServer) AddPkiRevocationDistributionPoint(goCtx context.Context, msg 
 		return nil, pkitypes.NewErrUnauthorizedRole("MsgAddPkiRevocationDistributionPoint", dclauthtypes.Vendor)
 	}
 
-	// compare VID in message and Vendor acount
+	// decode CrlSignerCertificate
+	crlSignerCertificate, err := x509.ParseAndValidateCertificate(msg.CrlSignerCertificate)
+	if err != nil {
+		return nil, pkitypes.NewErrInvalidCertificate(err)
+	}
+
+	// verify CrlSignerCertificate
+	err = VerifyCrlSignerCertificate(crlSignerCertificate, msg)
+	if err != nil {
+		return nil, err
+	}
+
+	// compare VID in message and Vendor account
 	if msg.Vid != signerAccount.VendorID {
 		return nil, pkitypes.NewErrMessageVidNotEqualAccountVid(msg.Vid, signerAccount.VendorID)
 	}
@@ -119,7 +129,7 @@ func (k msgServer) checkRootCert(ctx sdk.Context, crlSignerCertificate *x509.Cer
 
 func (k msgServer) checkCRLSignerNonRootCert(ctx sdk.Context, crlSignerCertificate *x509.Certificate, crlSignerDelegator string, isPAA bool) error {
 	if crlSignerDelegator != "" && !isPAA {
-		crlSignerDelegatorCert, err := x509.DecodeX509Certificate(crlSignerDelegator)
+		crlSignerDelegatorCert, err := x509.ParseAndValidateCertificate(crlSignerDelegator)
 		if err != nil {
 			return pkitypes.NewErrInvalidCertificate(err)
 		}
@@ -140,6 +150,151 @@ func (k msgServer) checkCRLSignerNonRootCert(ctx sdk.Context, crlSignerCertifica
 	_, err := k.verifyCertificate(ctx, crlSignerCertificate)
 	if err != nil {
 		return pkitypes.NewErrCertNotChainedBack()
+	}
+
+	return nil
+}
+
+func VerifyCrlSignerCertificate(cert *x509.Certificate, msg *types.MsgAddPkiRevocationDistributionPoint) error {
+	if msg.IsPAA {
+		return verifyPAA(cert, msg)
+	}
+
+	return verifyPAI(cert, msg)
+}
+
+func verifyPAA(cert *x509.Certificate, msg *types.MsgAddPkiRevocationDistributionPoint) error {
+	if msg.Pid != 0 {
+		return pkitypes.NewErrNotEmptyPidForRootCertificate()
+	}
+
+	pid, _ := x509.GetPidFromSubject(cert.SubjectAsText)
+	if pid != 0 {
+		return pkitypes.NewErrNotEmptyPidForRootCertificate()
+	}
+
+	// verify VID
+	vid, err := x509.GetVidFromSubject(cert.SubjectAsText)
+	if err != nil {
+		return pkitypes.NewErrInvalidVidFormat(err)
+	}
+
+	if vid > 0 && vid != msg.Vid {
+		return pkitypes.NewErrCRLSignerCertificateVidNotEqualMsgVid(vid, msg.Vid)
+	}
+
+	if !cert.IsSelfSigned() {
+		err = VerifyCRLSignerCertFormat(cert)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+var oidKeyUsage = asn1.ObjectIdentifier{2, 5, 29, 15}
+
+func verifyPAI(cert *x509.Certificate, msg *types.MsgAddPkiRevocationDistributionPoint) error {
+	if cert.IsSelfSigned() {
+		return pkitypes.NewErrNonRootCertificateSelfSigned()
+	}
+
+	// verify VID
+	vid, err := x509.GetVidFromSubject(cert.SubjectAsText)
+	if err != nil {
+		return pkitypes.NewErrInvalidVidFormat(err)
+	}
+
+	if vid > 0 && vid != msg.Vid {
+		return pkitypes.NewErrCRLSignerCertificateVidNotEqualMsgVid(vid, msg.Vid)
+	}
+
+	// verify PID
+	pid, err := x509.GetPidFromSubject(cert.SubjectAsText)
+	if err != nil {
+		return pkitypes.NewErrInvalidPidFormat(err)
+	}
+	if pid == 0 && msg.Pid != 0 {
+		return pkitypes.NewErrNotEmptyPidForNonRootCertificate()
+	}
+	if pid != 0 && msg.Pid == 0 {
+		return pkitypes.NewErrPidNotFoundInMessage(pid)
+	}
+	if pid > 0 && pid != msg.Pid {
+		return pkitypes.NewErrCRLSignerCertificatePidNotEqualMsgPid(pid, msg.Pid)
+	}
+
+	if msg.CrlSignerDelegator != "" {
+		err = VerifyCRLSignerCertFormat(cert)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func VerifyCRLSignerCertFormat(certificate *x509.Certificate) error {
+	if certificate.SubjectKeyID == "" {
+		return pkitypes.NewErrWrongSubjectKeyIDFormat()
+	}
+
+	cert := certificate.Certificate
+	if cert.Version != 3 {
+		return pkitypes.NewErrCRLSignerCertificateInvalidVersion(
+			"The version field SHALL be set to 2 to indicate v3 certificate",
+		)
+	}
+
+	if cert.SignatureAlgorithm != x509std.ECDSAWithSHA256 {
+		return pkitypes.NewErrCRLSignerCertificateInvalidFormat(
+			"The signature field SHALL contain the identifier for signatureAlgorithm ecdsa-with-SHA256",
+		)
+	}
+
+	// Type assert to get the ECDSA public key
+	ecdsaPubKey, ok := cert.PublicKey.(*ecdsa.PublicKey)
+	if !ok {
+		return pkitypes.NewErrCRLSignerCertificateInvalidFormat(
+			"Public key is not of type ECDSA",
+		)
+	}
+
+	// Check if the curve parameters match prime256v1 (secp256r1 / P-256)
+	if ecdsaPubKey.Curve != elliptic.P256() {
+		return pkitypes.NewErrCRLSignerCertificateInvalidFormat(
+			"The public key must use prime256v1 curve",
+		)
+	}
+
+	// Basic Constraint extension should be marked critical and have the cA field set to false
+	if !cert.BasicConstraintsValid || cert.IsCA {
+		return pkitypes.NewErrCRLSignerCertificateInvalidFormat(
+			"Basic Constraint extension's cA field SHALL be set to FALSE",
+		)
+	}
+
+	// Basic Constraint extension should be marked critical
+	isCritical := false
+	for _, ext := range cert.Extensions {
+		if ext.Id.Equal(oidKeyUsage) {
+			isCritical = ext.Critical
+
+			break
+		}
+	}
+
+	if !isCritical {
+		return pkitypes.NewErrCRLSignerCertificateInvalidFormat("Basic Constraint extension SHALL be marked critical")
+	}
+
+	if cert.KeyUsage&x509std.KeyUsageCRLSign == 0 {
+		return pkitypes.NewErrCRLSignerCertificateInvalidFormat("The cRLSign bits SHALL be set in the KeyUsage bitstring")
+	}
+
+	if cert.KeyUsage&^(x509std.KeyUsageCRLSign|x509std.KeyUsageDigitalSignature) != 0 {
+		return pkitypes.NewErrCRLSignerCertificateInvalidFormat("The KeyUsage bitstring can only include the cRLSign and digitalSignature bits")
 	}
 
 	return nil

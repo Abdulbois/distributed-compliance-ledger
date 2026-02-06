@@ -58,7 +58,7 @@ func TestHandler_AssignVid_certificateWithSubjectVid(t *testing.T) {
 	vendorAcc := setup.CreateVendorAdminAccount(0)
 
 	// propose and approve x509 root certificate
-	rootCertificate := utils.RootDaCertificateWithNumericVid(setup.Trustee1)
+	rootCertificate := utils.RootDaCertWithSameSubjectKeyID1(setup.Trustee1)
 	rootCertificate.Vid = 0
 	utils.ProposeAndApproveRootCertificate(setup, setup.Trustee1, rootCertificate)
 
@@ -179,7 +179,6 @@ func TestHandler_AssignVid_MessageVidAndCertificateVidNotEqual(t *testing.T) {
 
 	// propose and approve x509 root certificate
 	rootCert := utils.RootDaCertificateWithNumericVid(setup.Trustee1)
-	rootCert.Vid = 0
 	utils.ProposeAndApproveRootCertificate(setup, setup.Trustee1, rootCert)
 
 	assignVid := types.MsgAssignVid{

@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 	testconstants "github.com/zigbee-alliance/distributed-compliance-ledger/integration_tests/constants"
 	"github.com/zigbee-alliance/distributed-compliance-ledger/testutil/sample"
-	pkitypes "github.com/zigbee-alliance/distributed-compliance-ledger/types/pki"
 	"github.com/zigbee-alliance/distributed-compliance-ledger/utils/validator"
 )
 
@@ -63,17 +62,6 @@ func TestMsgProposeAddX509RootCert_ValidateBasic(t *testing.T) {
 				Time:   12345,
 			},
 			err: validator.ErrFieldLowerBoundViolated,
-		},
-		{
-			name: "invalid VID",
-			msg: MsgProposeAddX509RootCert{
-				Signer: sample.AccAddress(),
-				Cert:   testconstants.PAACertWithNumericVid,
-				Info:   testconstants.Info,
-				Time:   12345,
-				Vid:    testconstants.Vid + 5,
-			},
-			err: pkitypes.ErrCertificateVidNotEqualMsgVid,
 		},
 		{
 			name: "certSchemaVersion != 0",
