@@ -80,7 +80,12 @@ func (m *ComplianceKeeperMock) GetComplianceInfo(
 ) (val dclcompltypes.ComplianceInfo, found bool) {
 	args := m.Called(ctx, vid, pid, softwareVersion, certificationType)
 
-	return val, args.Bool(0)
+	complianceInfo, ok := args.Get(0).(dclcompltypes.ComplianceInfo)
+	if ok {
+		val = complianceInfo
+	}
+
+	return val, args.Bool(len(args) - 1)
 }
 
 var _ keeper.ComplianceKeeper = &ComplianceKeeperMock{}
@@ -797,6 +802,9 @@ func TestHandler_DeleteModelAfterDeletingModelVersion(t *testing.T) {
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
+
 	// add two new model versions
 	msgCreateModelVersion1 := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
 	_, err = setup.Handler(setup.Ctx, msgCreateModelVersion1)
@@ -806,7 +814,7 @@ func TestHandler_DeleteModelAfterDeletingModelVersion(t *testing.T) {
 	_, err = setup.Handler(setup.Ctx, msgCreateModelVersion2)
 	require.NoError(t, err)
 
-	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper = setup.ComplianceKeeper
 	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
 
 	msgDeleteModelVersion1 := NewMsgDeleteModelVersion(setup.Vendor)
@@ -832,6 +840,8 @@ func TestHandler_DeleteModelWithAssociatedModelVersionsNotCertified(t *testing.T
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
 	// add two new model versions
 	msgCreateModelVersion1 := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
 	_, err = setup.Handler(setup.Ctx, msgCreateModelVersion1)
@@ -842,7 +852,6 @@ func TestHandler_DeleteModelWithAssociatedModelVersionsNotCertified(t *testing.T
 	require.NoError(t, err)
 
 	// mock model versions not to be certified
-	complianceKeeper := setup.ComplianceKeeper
 	complianceKeeper.On("GetComplianceInfo", mock.Anything, msgCreateModelVersion1.Vid, msgCreateModelVersion1.Pid, msgCreateModelVersion1.SoftwareVersion, mock.Anything).Return(false)
 	complianceKeeper.On("GetComplianceInfo", mock.Anything, msgCreateModelVersion2.Vid, msgCreateModelVersion2.Pid, msgCreateModelVersion2.SoftwareVersion, mock.Anything).Return(false)
 	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(true)
@@ -885,17 +894,20 @@ func TestHandler_DeleteModelWithAssociatedModelVersionsCertified(t *testing.T) {
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+
 	// add two new model versions
 	msgCreateModelVersion1 := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, msgCreateModelVersion1.Vid, msgCreateModelVersion1.Pid, msgCreateModelVersion1.SoftwareVersion, mock.Anything).Times(len(dclcompltypes.CertificationTypesList)).Return(false)
 	_, err = setup.Handler(setup.Ctx, msgCreateModelVersion1)
 	require.NoError(t, err)
 
 	msgCreateModelVersion2 := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion+1)
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, msgCreateModelVersion2.Vid, msgCreateModelVersion2.Pid, msgCreateModelVersion2.SoftwareVersion, mock.Anything).Times(len(dclcompltypes.CertificationTypesList)).Return(false)
 	_, err = setup.Handler(setup.Ctx, msgCreateModelVersion2)
 	require.NoError(t, err)
 
 	// mock one model version to be certified
-	complianceKeeper := setup.ComplianceKeeper
 	complianceKeeper.On("GetComplianceInfo", mock.Anything, msgCreateModelVersion1.Vid, msgCreateModelVersion1.Pid, msgCreateModelVersion1.SoftwareVersion, mock.Anything).Return(false)
 	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(true)
 
@@ -1027,46 +1039,142 @@ func TestHandler_OnlyOwnerAndVendorWithSameVidCanDeleteModel(t *testing.T) {
 
 func TestHandler_AddModelVersion(t *testing.T) {
 	setup := Setup(t)
-
 	// add new model
 	msgCreateModel := NewMsgCreateModel(setup.Vendor)
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
 
-	// add new model version
-	msgCreateModelVersion := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
-	schemaVersion := msgCreateModelVersion.SchemaVersion
-	_, err = setup.Handler(setup.Ctx, msgCreateModelVersion)
-	require.NoError(t, err)
+	softwareVersion := testconstants.SoftwareVersion
 
-	// query model version
-	receivedModelVersion, err := queryModelVersion(
-		setup,
-		msgCreateModelVersion.Vid,
-		msgCreateModelVersion.Pid,
-		msgCreateModelVersion.SoftwareVersion,
-	)
-	require.NoError(t, err)
+	positiveTests := []struct {
+		name string
+		msg  *types.MsgCreateModelVersion
+	}{
+		{
+			name: "when compliance info does not exist",
+			msg: func(msg *types.MsgCreateModelVersion) *types.MsgCreateModelVersion {
+				complianceKeeper := setup.ComplianceKeeper
+				complianceKeeper.On("GetComplianceInfo", mock.Anything, msg.Vid, msg.Pid, msg.SoftwareVersion, mock.Anything).Return(false)
 
-	// check
-	require.Equal(t, msgCreateModelVersion.Vid, receivedModelVersion.Vid)
-	require.Equal(t, msgCreateModelVersion.Pid, receivedModelVersion.Pid)
-	require.Equal(t, msgCreateModelVersion.SoftwareVersion, receivedModelVersion.SoftwareVersion)
-	require.Equal(t, msgCreateModelVersion.SoftwareVersionString, receivedModelVersion.SoftwareVersionString)
+				return msg
+			}(NewMsgCreateModelVersion(setup.Vendor, softwareVersion)),
+		},
+		{
+			name: "when compliance info already exists",
+			msg: func(msg *types.MsgCreateModelVersion) *types.MsgCreateModelVersion {
+				complianceKeeper := setup.ComplianceKeeper
+				complianceInfo := dclcompltypes.ComplianceInfo{
+					Vid:                   msg.Vid,
+					Pid:                   msg.Pid,
+					SoftwareVersion:       msg.SoftwareVersion,
+					SoftwareVersionString: msg.SoftwareVersionString,
+					CDVersionNumber:       uint32(msg.CdVersionNumber),
+				}
 
-	// query model versions
-	receivedModelVersions, err := queryAllModelVersions(
-		setup,
-		msgCreateModelVersion.Vid,
-		msgCreateModelVersion.Pid,
-	)
-	require.NoError(t, err)
+				complianceKeeper.On("GetComplianceInfo", mock.Anything, msg.Vid, msg.Pid, msg.SoftwareVersion, mock.Anything).Return(complianceInfo, true)
 
-	// check
-	require.Equal(t, msgCreateModelVersion.Vid, receivedModelVersions.Vid)
-	require.Equal(t, msgCreateModelVersion.Pid, receivedModelVersions.Pid)
-	require.Equal(t, []uint32{msgCreateModelVersion.SoftwareVersion}, receivedModelVersions.SoftwareVersions)
-	require.Equal(t, schemaVersion, receivedModelVersion.SchemaVersion)
+				return msg
+			}(NewMsgCreateModelVersion(setup.Vendor, softwareVersion+1)),
+		},
+	}
+
+	negativeTests := []struct {
+		name string
+		msg  *types.MsgCreateModelVersion
+		err  error
+	}{
+		{
+			name: "when compliance info software version string does not match",
+			msg: func(msg *types.MsgCreateModelVersion) *types.MsgCreateModelVersion {
+				complianceKeeper := setup.ComplianceKeeper
+
+				complianceInfo := dclcompltypes.ComplianceInfo{
+					Vid:                   msg.Vid,
+					Pid:                   msg.Pid,
+					SoftwareVersion:       msg.SoftwareVersion,
+					SoftwareVersionString: "4.0",
+					CDVersionNumber:       uint32(msg.CdVersionNumber),
+				}
+				complianceKeeper.On("GetComplianceInfo", mock.Anything, msg.Vid, msg.Pid, msg.SoftwareVersion, mock.Anything).Return(complianceInfo, true)
+
+				return msg
+			}(NewMsgCreateModelVersion(setup.Vendor, softwareVersion+2)),
+			err: types.ErrComplianceInfoSoftwareVersionStringDoesNotMatch,
+		},
+		{
+			name: "when compliance info CD version does not match",
+			msg: func(msg *types.MsgCreateModelVersion) *types.MsgCreateModelVersion {
+				complianceKeeper := setup.ComplianceKeeper
+				complianceInfo := dclcompltypes.ComplianceInfo{
+					Vid:                   msg.Vid,
+					Pid:                   msg.Pid,
+					SoftwareVersion:       msg.SoftwareVersion,
+					SoftwareVersionString: msg.SoftwareVersionString,
+					CDVersionNumber:       uint32(msg.CdVersionNumber + 1),
+				}
+
+				complianceKeeper.On("GetComplianceInfo", mock.Anything, msg.Vid, msg.Pid, msg.SoftwareVersion, mock.Anything).Return(complianceInfo, true)
+
+				return msg
+			}(NewMsgCreateModelVersion(setup.Vendor, softwareVersion+3)),
+			err: types.ErrComplianceInfoCDVersionNumberDoesNotMatch,
+		},
+	}
+
+	for _, tt := range positiveTests {
+		t.Run(tt.name, func(t *testing.T) {
+			msgCreateModelVersion := tt.msg
+			currentModelVersions, _ := queryAllModelVersions(
+				setup,
+				msgCreateModelVersion.Vid,
+				msgCreateModelVersion.Pid,
+			)
+
+			_, err = setup.Handler(setup.Ctx, msgCreateModelVersion)
+			require.NoError(t, err)
+
+			// query model version
+			receivedModelVersion, err := queryModelVersion(
+				setup,
+				msgCreateModelVersion.Vid,
+				msgCreateModelVersion.Pid,
+				msgCreateModelVersion.SoftwareVersion,
+			)
+			require.NoError(t, err)
+
+			// check
+			require.Equal(t, msgCreateModelVersion.Vid, receivedModelVersion.Vid)
+			require.Equal(t, msgCreateModelVersion.Pid, receivedModelVersion.Pid)
+			require.Equal(t, msgCreateModelVersion.SoftwareVersion, receivedModelVersion.SoftwareVersion)
+			require.Equal(t, msgCreateModelVersion.SoftwareVersionString, receivedModelVersion.SoftwareVersionString)
+
+			// query model versions
+			receivedModelVersions, err := queryAllModelVersions(
+				setup,
+				msgCreateModelVersion.Vid,
+				msgCreateModelVersion.Pid,
+			)
+			require.NoError(t, err)
+
+			// check
+			if currentModelVersions == nil {
+				require.Equal(t, msgCreateModelVersion.Vid, receivedModelVersions.Vid)
+				require.Equal(t, msgCreateModelVersion.Pid, receivedModelVersions.Pid)
+				require.Equal(t, []uint32{msgCreateModelVersion.SoftwareVersion}, receivedModelVersions.SoftwareVersions)
+				require.Equal(t, msgCreateModelVersion.SchemaVersion, receivedModelVersion.SchemaVersion)
+			} else {
+				currentModelVersions.SoftwareVersions = append(currentModelVersions.SoftwareVersions, msgCreateModelVersion.SoftwareVersion)
+				require.Equal(t, currentModelVersions, receivedModelVersions)
+			}
+		})
+
+		for _, tt := range negativeTests {
+			t.Run(tt.name, func(t *testing.T) {
+				_, err = setup.Handler(setup.Ctx, tt.msg)
+				require.ErrorIs(t, err, tt.err)
+			})
+		}
+	}
 }
 
 func TestHandler_AddMultipleModelVersions(t *testing.T) {
@@ -1076,6 +1184,9 @@ func TestHandler_AddMultipleModelVersions(t *testing.T) {
 	msgCreateModel := NewMsgCreateModel(setup.Vendor)
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
+
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
 
 	// add new model version 1
 	msgCreateModelVersion1 := NewMsgCreateModelVersion(setup.Vendor, uint32(1))
@@ -1145,6 +1256,9 @@ func TestHandler_UpdateModelVersion(t *testing.T) {
 	require.Error(t, err)
 	require.True(t, types.ErrModelVersionDoesNotExist.Is(err))
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
+
 	// add new model version
 	msgCreateModelVersion := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
 	_, err = setup.Handler(setup.Ctx, msgCreateModelVersion)
@@ -1213,6 +1327,9 @@ func TestHandler_UpdateModelVersionByVendorWithProductIds(t *testing.T) {
 	_, err := setup.Handler(setup.Ctx, msgCreteModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
+
 	// add new model version
 	msgCreateModelVersion := NewMsgCreateModelVersion(owner, testconstants.SoftwareVersion)
 	msgCreateModelVersion.Pid = 200
@@ -1254,6 +1371,8 @@ func TestHandler_PartiallyUpdateModelVersion(t *testing.T) {
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
 	// add new model version
 	msgCreateModelVersion := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
 	_, err = setup.Handler(setup.Ctx, msgCreateModelVersion)
@@ -1303,6 +1422,8 @@ func TestHandler_UpdateOnlyMinApplicableSoftwareVersion(t *testing.T) {
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
 	// add new model version
 	msgCreateModelVersion := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
 	msgCreateModelVersion.MinApplicableSoftwareVersion = 5
@@ -1373,6 +1494,8 @@ func TestHandler_UpdateOnlyMaxApplicableSoftwareVersion(t *testing.T) {
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
 	// add new model version
 	msgCreateModelVersion := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
 	msgCreateModelVersion.MinApplicableSoftwareVersion = 5
@@ -1443,6 +1566,8 @@ func TestHandler_UpdateOTAFieldsInitiallyNotSet(t *testing.T) {
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
 	// add new model version
 	msgCreateModelVersion := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
 	msgCreateModelVersion.OtaUrl = ""
@@ -1484,6 +1609,8 @@ func TestHandler_UpdateOTAFieldsInitiallySet(t *testing.T) {
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
 	// add new model version
 	msgCreateModelVersion := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
 
@@ -1523,6 +1650,8 @@ func TestHandler_OnlyOwnerAndVendorWithSameVidCanUpdateModelVersion(t *testing.T
 	_, err := setup.Handler(setup.Ctx, msgCreteModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
 	// add new model version
 	msgCreateModelVersion := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
 	_, err = setup.Handler(setup.Ctx, msgCreateModelVersion)
@@ -1577,6 +1706,8 @@ func TestHandler_DeleteModelVersion(t *testing.T) {
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
 	// add new model version
 	msgCreateModelVersion := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
 	_, err = setup.Handler(setup.Ctx, msgCreateModelVersion)
@@ -1584,7 +1715,6 @@ func TestHandler_DeleteModelVersion(t *testing.T) {
 
 	msgDeleteModelVersion := NewMsgDeleteModelVersion(setup.Vendor)
 
-	complianceKeeper := setup.ComplianceKeeper
 	complianceKeeper.On("GetComplianceInfo", mock.Anything, msgDeleteModelVersion.Vid, msgDeleteModelVersion.Pid, msgDeleteModelVersion.SoftwareVersion, mock.Anything).Return(false)
 	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(true)
 
@@ -1619,6 +1749,9 @@ func TestHandler_DeleteOneOfTwoModelVersions(t *testing.T) {
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
+
 	// add two new model versions
 	msgCreateModelVersion1 := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
 	_, err = setup.Handler(setup.Ctx, msgCreateModelVersion1)
@@ -1629,7 +1762,6 @@ func TestHandler_DeleteOneOfTwoModelVersions(t *testing.T) {
 	require.NoError(t, err)
 
 	// mock model versions not to be certified
-	complianceKeeper := setup.ComplianceKeeper
 	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
 
 	msgDeleteModelVersion := NewMsgDeleteModelVersion(setup.Vendor)
@@ -1669,6 +1801,8 @@ func TestHandler_DeleteModelVersionDifferentAccSameVid(t *testing.T) {
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
 	// add new model version
 	msgCreateModelVersion := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
 	_, err = setup.Handler(setup.Ctx, msgCreateModelVersion)
@@ -1681,7 +1815,6 @@ func TestHandler_DeleteModelVersionDifferentAccSameVid(t *testing.T) {
 
 	msgDeleteModelVersion := NewMsgDeleteModelVersion(secondAcc)
 
-	complianceKeeper := setup.ComplianceKeeper
 	complianceKeeper.On("GetComplianceInfo", mock.Anything, msgDeleteModelVersion.Vid, msgDeleteModelVersion.Pid, msgDeleteModelVersion.SoftwareVersion, mock.Anything).Return(false)
 	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(true)
 
@@ -1707,6 +1840,8 @@ func TestHandler_DeleteModelVersionNotByVendor(t *testing.T) {
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
 	// add new model version
 	msgCreateModelVersion := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
 	_, err = setup.Handler(setup.Ctx, msgCreateModelVersion)
@@ -1727,6 +1862,8 @@ func TestHandler_DeleteModelVersionDifferentVid(t *testing.T) {
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
 	// add new model version
 	msgCreateModelVersion := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
 	_, err = setup.Handler(setup.Ctx, msgCreateModelVersion)
@@ -1747,6 +1884,8 @@ func TestHandler_DeleteModelVersionDoesNotExist(t *testing.T) {
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
 	// add new model version
 	msgCreateModelVersion := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
 	_, err = setup.Handler(setup.Ctx, msgCreateModelVersion)
@@ -1767,6 +1906,8 @@ func TestHandler_DeleteModelVersionNotByCreator(t *testing.T) {
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
 	// add new model version
 	msgCreateModelVersion := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
 	_, err = setup.Handler(setup.Ctx, msgCreateModelVersion)
@@ -1788,6 +1929,8 @@ func TestHandler_DeleteModelVersionCertified(t *testing.T) {
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Times(len(dclcompltypes.CertificationTypesList)).Return(false)
 	// add new model version
 	msgCreateModelVersion := NewMsgCreateModelVersion(setup.Vendor, testconstants.SoftwareVersion)
 	_, err = setup.Handler(setup.Ctx, msgCreateModelVersion)
@@ -1795,7 +1938,6 @@ func TestHandler_DeleteModelVersionCertified(t *testing.T) {
 
 	msgDeleteModelVersion := NewMsgDeleteModelVersion(setup.Vendor)
 
-	complianceKeeper := setup.ComplianceKeeper
 	complianceKeeper.On("GetComplianceInfo", mock.Anything, msgDeleteModelVersion.Vid, msgDeleteModelVersion.Pid, msgDeleteModelVersion.SoftwareVersion, mock.Anything).Return(true)
 	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
 
@@ -1815,6 +1957,8 @@ func TestHandler_DeleteModelVersionByVendorWithProductIds(t *testing.T) {
 	_, err := setup.Handler(setup.Ctx, msgCreateModel)
 	require.NoError(t, err)
 
+	complianceKeeper := setup.ComplianceKeeper
+	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(false)
 	// add new model version
 	msgCreateModelVersion := NewMsgCreateModelVersion(owner, testconstants.SoftwareVersion)
 	msgCreateModelVersion.Pid = 200
@@ -1832,7 +1976,6 @@ func TestHandler_DeleteModelVersionByVendorWithProductIds(t *testing.T) {
 	msgDeleteModelVersion = NewMsgDeleteModelVersion(owner)
 	msgDeleteModelVersion.Pid = 200
 
-	complianceKeeper := setup.ComplianceKeeper
 	complianceKeeper.On("GetComplianceInfo", mock.Anything, msgDeleteModelVersion.Vid, msgDeleteModelVersion.Pid, msgDeleteModelVersion.SoftwareVersion, mock.Anything).Return(false)
 	complianceKeeper.On("GetComplianceInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(true)
 

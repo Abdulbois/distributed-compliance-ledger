@@ -875,20 +875,11 @@ func DemoTrackCompliance(suite *utils.TestSuite) {
 	)
 	require.NotNil(suite.T, certCenterAccount)
 
-	// Publish model info
 	pid := int32(tmrand.Uint16())
-	firstModel := testModel.NewMsgCreateModel(vid, pid, vendorAccount.Address)
-	_, err = suite.BuildAndBroadcastTx([]sdk.Msg{firstModel}, vendorName, vendorAccount)
-	require.NoError(suite.T, err)
-
-	// Publish modelVersion
 	sv := tmrand.Uint32()
 	svs := utils.RandString()
-	firstModelVersion := testModel.NewMsgCreateModelVersion(vid, pid, sv, svs, vendorAccount.Address)
-	_, err = suite.BuildAndBroadcastTx([]sdk.Msg{firstModelVersion}, vendorName, vendorAccount)
-	require.NoError(suite.T, err)
 
-	// Check if model either certified or revoked before Compliance record was created
+	// Check if the model either certified or revoked before the Compliance record was created
 	_, err = GetComplianceInfo(suite, vid, pid, sv, compliancetypes.ZigbeeCertificationType)
 	suite.AssertNotFound(err)
 	_, err = GetRevokedModel(suite, vid, pid, sv, compliancetypes.ZigbeeCertificationType)
@@ -898,10 +889,81 @@ func DemoTrackCompliance(suite *utils.TestSuite) {
 	_, err = GetProvisionalModel(suite, vid, pid, sv, compliancetypes.ZigbeeCertificationType)
 	suite.AssertNotFound(err)
 
-	// Certify model
-	certReason := testconstants.Reason + "1"
+	// Certify a device when Model Version does not exist yet
+	certReason := testconstants.Reason + "0"
+	cdCertificateID := testconstants.CDCertificateID + "1"
 	certDate := testconstants.FirstJanuary
 	certifyModelMsg := compliancetypes.MsgCertifyModel{
+		Vid:                   vid,
+		Pid:                   pid,
+		SoftwareVersion:       sv,
+		SoftwareVersionString: svs,
+		CertificationDate:     certDate,
+		CertificationType:     "zigbee",
+		Reason:                certReason,
+		CDCertificateId:       cdCertificateID,
+		CDVersionNumber:       uint32(testconstants.CdVersionNumber),
+		Signer:                certCenterAccount.Address,
+	}
+	_, err = suite.BuildAndBroadcastTx([]sdk.Msg{&certifyModelMsg}, certCenter, certCenterAccount)
+	require.NoError(suite.T, err)
+
+	// Certify model again
+	_, err = suite.BuildAndBroadcastTx([]sdk.Msg{&certifyModelMsg}, certCenter, certCenterAccount)
+	require.Error(suite.T, err)
+	require.True(suite.T, compliancetypes.ErrAlreadyCertified.Is(err))
+
+	// Check model is certified
+	complianceInfo, _ := GetComplianceInfo(suite, vid, pid, sv, compliancetypes.ZigbeeCertificationType)
+	require.Equal(suite.T, compliancetypes.ZigbeeCertificationType, complianceInfo.CertificationType)
+	require.Equal(suite.T, uint32(2), complianceInfo.SoftwareVersionCertificationStatus)
+	require.Equal(suite.T, vid, complianceInfo.Vid)
+	require.Equal(suite.T, pid, complianceInfo.Pid)
+	require.Equal(suite.T, sv, complianceInfo.SoftwareVersion)
+	require.Equal(suite.T, cdCertificateID, complianceInfo.CDCertificateId)
+	require.Equal(suite.T, certReason, complianceInfo.Reason)
+	require.Equal(suite.T, certDate, complianceInfo.Date)
+	modelIsCertified, _ := GetCertifiedModel(suite, vid, pid, sv, compliancetypes.ZigbeeCertificationType)
+	require.True(suite.T, modelIsCertified.Value)
+	modelIsRevoked, _ := GetRevokedModel(suite, vid, pid, sv, compliancetypes.ZigbeeCertificationType)
+	require.False(suite.T, modelIsRevoked.Value)
+	modelIsProvisional, _ := GetProvisionalModel(suite, vid, pid, sv, compliancetypes.ZigbeeCertificationType)
+	require.False(suite.T, modelIsProvisional.Value)
+
+	// Check device software compliance
+	deviceSoftwareCompliance, _ := GetDeviceSoftwareCompliance(suite, cdCertificateID)
+	require.Equal(suite.T, cdCertificateID, deviceSoftwareCompliance.CDCertificateId)
+	require.Equal(suite.T, 1, len(deviceSoftwareCompliance.ComplianceInfo))
+	require.Equal(suite.T, compliancetypes.ZigbeeCertificationType, deviceSoftwareCompliance.ComplianceInfo[0].CertificationType)
+	require.Equal(suite.T, uint32(2), deviceSoftwareCompliance.ComplianceInfo[0].SoftwareVersionCertificationStatus)
+	require.Equal(suite.T, vid, deviceSoftwareCompliance.ComplianceInfo[0].Vid)
+	require.Equal(suite.T, pid, deviceSoftwareCompliance.ComplianceInfo[0].Pid)
+	require.Equal(suite.T, sv, deviceSoftwareCompliance.ComplianceInfo[0].SoftwareVersion)
+	require.Equal(suite.T, cdCertificateID, deviceSoftwareCompliance.ComplianceInfo[0].CDCertificateId)
+	require.Equal(suite.T, certReason, deviceSoftwareCompliance.ComplianceInfo[0].Reason)
+	require.Equal(suite.T, certDate, deviceSoftwareCompliance.ComplianceInfo[0].Date)
+
+	inputAllComplianceInfo, _ = GetAllComplianceInfo(suite)
+	inputAllCertifiedModels, _ = GetAllCertifiedModels(suite)
+	inputAllDeviceSoftwareCompliance, _ = GetAllDeviceSoftwareCompliance(suite)
+
+	pid = int32(tmrand.Uint16())
+	sv = tmrand.Uint32()
+	svs = utils.RandString()
+	// Publish model info
+	firstModel := testModel.NewMsgCreateModel(vid, pid, vendorAccount.Address)
+	_, err = suite.BuildAndBroadcastTx([]sdk.Msg{firstModel}, vendorName, vendorAccount)
+	require.NoError(suite.T, err)
+
+	// Publish modelVersion
+	firstModelVersion := testModel.NewMsgCreateModelVersion(vid, pid, sv, svs, vendorAccount.Address)
+	_, err = suite.BuildAndBroadcastTx([]sdk.Msg{firstModelVersion}, vendorName, vendorAccount)
+	require.NoError(suite.T, err)
+
+	// Certify model
+	certReason = testconstants.Reason + "1"
+	certDate = testconstants.FirstJanuary
+	certifyModelMsg = compliancetypes.MsgCertifyModel{
 		Vid:                   vid,
 		Pid:                   pid,
 		SoftwareVersion:       sv,
@@ -922,7 +984,7 @@ func DemoTrackCompliance(suite *utils.TestSuite) {
 	require.True(suite.T, compliancetypes.ErrAlreadyCertified.Is(err))
 
 	// Check model is certified
-	complianceInfo, _ := GetComplianceInfo(suite, vid, pid, sv, compliancetypes.ZigbeeCertificationType)
+	complianceInfo, _ = GetComplianceInfo(suite, vid, pid, sv, compliancetypes.ZigbeeCertificationType)
 	require.Equal(suite.T, compliancetypes.ZigbeeCertificationType, complianceInfo.CertificationType)
 	require.Equal(suite.T, uint32(2), complianceInfo.SoftwareVersionCertificationStatus)
 	require.Equal(suite.T, vid, complianceInfo.Vid)
@@ -931,15 +993,15 @@ func DemoTrackCompliance(suite *utils.TestSuite) {
 	require.Equal(suite.T, testconstants.CDCertificateID, complianceInfo.CDCertificateId)
 	require.Equal(suite.T, certReason, complianceInfo.Reason)
 	require.Equal(suite.T, certDate, complianceInfo.Date)
-	modelIsCertified, _ := GetCertifiedModel(suite, vid, pid, sv, compliancetypes.ZigbeeCertificationType)
+	modelIsCertified, _ = GetCertifiedModel(suite, vid, pid, sv, compliancetypes.ZigbeeCertificationType)
 	require.True(suite.T, modelIsCertified.Value)
-	modelIsRevoked, _ := GetRevokedModel(suite, vid, pid, sv, compliancetypes.ZigbeeCertificationType)
+	modelIsRevoked, _ = GetRevokedModel(suite, vid, pid, sv, compliancetypes.ZigbeeCertificationType)
 	require.False(suite.T, modelIsRevoked.Value)
-	modelIsProvisional, _ := GetProvisionalModel(suite, vid, pid, sv, compliancetypes.ZigbeeCertificationType)
+	modelIsProvisional, _ = GetProvisionalModel(suite, vid, pid, sv, compliancetypes.ZigbeeCertificationType)
 	require.False(suite.T, modelIsProvisional.Value)
 
 	// Check device software compliance
-	deviceSoftwareCompliance, _ := GetDeviceSoftwareCompliance(suite, testconstants.CDCertificateID)
+	deviceSoftwareCompliance, _ = GetDeviceSoftwareCompliance(suite, testconstants.CDCertificateID)
 	require.Equal(suite.T, testconstants.CDCertificateID, deviceSoftwareCompliance.CDCertificateId)
 	require.Equal(suite.T, 1, len(deviceSoftwareCompliance.ComplianceInfo))
 	require.Equal(suite.T, compliancetypes.ZigbeeCertificationType, deviceSoftwareCompliance.ComplianceInfo[0].CertificationType)

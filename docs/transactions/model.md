@@ -136,6 +136,8 @@ If one of Model Versions associated with the Model is certified then Model can n
 Adds a new Model Software Version identified by a unique combination of `vid` (vendor ID), `pid` (product ID) and `softwareVersion`.
 If `account` was created with product ID ranges then the `pid` must fall within that specified range
 
+If the corresponding Compliance Info record already exists in the ledger, the Software Version and CD Version number must match the one being added.
+
 Not all Model Software Version fields can be edited (see `EDIT_MODEL_VERSION`).
 
 If one of `OTA_URl`, `OTA_checksum` or `OTA_checksum_type` fields is set, then the other two must also be set.

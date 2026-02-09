@@ -12,23 +12,25 @@ var (
 	ErrFallbackURLRequiresBitmask = errors.Register(ModuleName, 505, "CommissioningFallbackUrl requires DiscoveryCapabilitiesBitmask")
 
 	// Model Version Error Codes.
-	ErrSoftwareVersionStringInvalid       = errors.Register(ModuleName, 511, "software version string invalid")
-	ErrFirmwareInformationInvalid         = errors.Register(ModuleName, 512, "firmware digests invalid")
-	ErrCDVersionNumberInvalid             = errors.Register(ModuleName, 513, "CD version number invalid")
-	ErrOtaURLInvalid                      = errors.Register(ModuleName, 514, "OTA URL invalid")
-	ErrOtaMissingInformation              = errors.Register(ModuleName, 515, "OTA missing information")
-	ErrReleaseNotesURLInvalid             = errors.Register(ModuleName, 516, "release notes URL invalid")
-	ErrModelVersionDoesNotExist           = errors.Register(ModuleName, 517, "model version does not exist")
-	ErrNoModelVersionsExist               = errors.Register(ModuleName, 518, "no model versions exist")
-	ErrModelVersionAlreadyExists          = errors.Register(ModuleName, 519, "model version already exists")
-	ErrOtaURLCannotBeSet                  = errors.Register(ModuleName, 520, "OTA URL cannot be set")
-	ErrMaxSVLessThanMinSV                 = errors.Register(ModuleName, 521, "max software version less than min software version")
-	ErrLsfRevisionIsNotValid              = errors.Register(ModuleName, 522, "LsfRevision should monotonically increase by 1")
-	ErrLsfRevisionIsNotAllowed            = errors.Register(ModuleName, 523, "LsfRevision is not allowed if LsfURL is not present")
-	ErrModelVersionDeletionCertified      = errors.Register(ModuleName, 524, "model version has a compliance record and can not be deleted")
-	ErrModelDeletionCertified             = errors.Register(ModuleName, 525, "model has a model version that has a compliance record and  correcponding model can not be deleted")
-	ErrFieldIsNotBase64Encoded            = errors.Register(ModuleName, 526, "Field is not base64 encoded string")
-	ErrEnhancedSetupFlowTCRevisionInvalid = errors.Register(ModuleName, 527, "enhanced setup flow TC revision invalid")
+	ErrSoftwareVersionStringInvalid                    = errors.Register(ModuleName, 511, "software version string invalid")
+	ErrFirmwareInformationInvalid                      = errors.Register(ModuleName, 512, "firmware digests invalid")
+	ErrCDVersionNumberInvalid                          = errors.Register(ModuleName, 513, "CD version number invalid")
+	ErrOtaURLInvalid                                   = errors.Register(ModuleName, 514, "OTA URL invalid")
+	ErrOtaMissingInformation                           = errors.Register(ModuleName, 515, "OTA missing information")
+	ErrReleaseNotesURLInvalid                          = errors.Register(ModuleName, 516, "release notes URL invalid")
+	ErrModelVersionDoesNotExist                        = errors.Register(ModuleName, 517, "model version does not exist")
+	ErrNoModelVersionsExist                            = errors.Register(ModuleName, 518, "no model versions exist")
+	ErrModelVersionAlreadyExists                       = errors.Register(ModuleName, 519, "model version already exists")
+	ErrOtaURLCannotBeSet                               = errors.Register(ModuleName, 520, "OTA URL cannot be set")
+	ErrMaxSVLessThanMinSV                              = errors.Register(ModuleName, 521, "max software version less than min software version")
+	ErrLsfRevisionIsNotValid                           = errors.Register(ModuleName, 522, "LsfRevision should monotonically increase by 1")
+	ErrLsfRevisionIsNotAllowed                         = errors.Register(ModuleName, 523, "LsfRevision is not allowed if LsfURL is not present")
+	ErrModelVersionDeletionCertified                   = errors.Register(ModuleName, 524, "model version has a compliance record and can not be deleted")
+	ErrModelDeletionCertified                          = errors.Register(ModuleName, 525, "model has a model version that has a compliance record and  correcponding model can not be deleted")
+	ErrFieldIsNotBase64Encoded                         = errors.Register(ModuleName, 526, "Field is not base64 encoded string")
+	ErrEnhancedSetupFlowTCRevisionInvalid              = errors.Register(ModuleName, 527, "enhanced setup flow TC revision invalid")
+	ErrComplianceInfoSoftwareVersionStringDoesNotMatch = errors.Register(ModuleName, 528, "compliance info software version string does not match")
+	ErrComplianceInfoCDVersionNumberDoesNotMatch       = errors.Register(ModuleName, 529, "compliance info CD version number does not match")
 )
 
 func NewErrModelAlreadyExists(vid interface{}, pid interface{}) error {
@@ -148,4 +150,26 @@ func NewErrEnhancedSetupFlowTCDigestIsNotBase64Encoded(enhancedSetupFlowTCDigest
 func NewErrEnhancedSetupFlowTCRevisionInvalidIncrement(newEnhancedSetupFlowTCRevision int32, prevEnhancedSetupFlowTCRevision int32) error {
 	return errors.Wrapf(ErrEnhancedSetupFlowTCRevisionInvalid,
 		"EnhancedSetupFlowTCRevision %v is not correctly incremented to %v", prevEnhancedSetupFlowTCRevision, newEnhancedSetupFlowTCRevision)
+}
+
+func NewErrComplianceInfoSoftwareVersionStringDoesNotMatch(vid interface{}, pid interface{},
+	softwareVersion interface{}, softwareVersionString interface{},
+) error {
+	return errors.Wrapf(
+		ErrComplianceInfoSoftwareVersionStringDoesNotMatch,
+		"Compliance Info with vid=%v, pid=%v, softwareVersion=%v present on the ledger does not have"+
+			" matching softwareVersionString=%v",
+		vid, pid, softwareVersion, softwareVersionString,
+	)
+}
+
+func NewErrComplianceInfoCDVersionNumberDoesNotMatch(vid interface{}, pid interface{},
+	softwareVersion interface{}, cDVersionNumber interface{},
+) error {
+	return errors.Wrapf(
+		ErrComplianceInfoCDVersionNumberDoesNotMatch,
+		"Compliance Info with vid=%v, pid=%v, softwareVersion=%v present on the ledger does not have"+
+			" matching CDVersionNumber=%v",
+		vid, pid, softwareVersion, cDVersionNumber,
+	)
 }

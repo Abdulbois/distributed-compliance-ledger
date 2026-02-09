@@ -307,8 +307,6 @@ dcld tx vendorinfo update-vendor --vid=<uint16> ... --from=<vendor-admin-account
 
 This step is needed for on-ledger certification use case only, see [use_cases_device_on_ledger_certification](use_cases/use_cases_device_on_ledger_certification.png).
 
-The corresponding model and the version must be present on the ledger.
-
 ```bash
 dcld tx compliance certify-model --vid=<uint16> --pid=<uint16> --softwareVersion=<uint32> --softwareVersionString=<string>  --certificationType=<matter|zigbee> --certificationDate=<rfc3339 encoded date> --reason=<string> --from=<account>
 ```

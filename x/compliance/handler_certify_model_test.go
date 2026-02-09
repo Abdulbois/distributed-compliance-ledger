@@ -10,7 +10,6 @@ import (
 	testconstants "github.com/zigbee-alliance/distributed-compliance-ledger/integration_tests/constants"
 	"github.com/zigbee-alliance/distributed-compliance-ledger/x/compliance/types"
 	dclauthtypes "github.com/zigbee-alliance/distributed-compliance-ledger/x/dclauth/types"
-	modeltypes "github.com/zigbee-alliance/distributed-compliance-ledger/x/model/types"
 )
 
 func setupCertifyModel(t *testing.T) (*TestSetup, int32, int32, uint32, string, string) {
@@ -149,6 +148,20 @@ func TestHandler_CertifyProvisionedModelWithAllOptionalFlags(t *testing.T) {
 	require.Equal(t, provisionModelMsg.ProvisionalDate, complianceInfo.History[0].Date)
 }
 
+func TestHandler_CertifyModelWhenModelVersionDoesNotExist(t *testing.T) {
+	setup := setup(t)
+	vid, pid, softwareVersion := testconstants.Vid, testconstants.Pid, testconstants.SoftwareVersion
+	setup.setNoModelVersionForKey(vid, pid, softwareVersion)
+
+	certifyModelMsg := newMsgCertifyModel(vid, pid, softwareVersion, testconstants.SoftwareVersionString, types.ZigbeeCertificationType, setup.CertificationCenter)
+	_, certifyModelErr := setup.Handler(setup.Ctx, certifyModelMsg)
+	require.NoError(t, certifyModelErr)
+
+	complianceInfo := setup.checkCertifiedModelMatchesMsg(t, certifyModelMsg)
+	setup.checkDeviceSoftwareComplianceMatchesComplianceInfo(t, complianceInfo)
+	setup.checkModelCertified(t, certifyModelMsg)
+}
+
 func TestHandler_CertifyModelByDifferentRoles(t *testing.T) {
 	setup, vid, pid, softwareVersion, softwareVersionString, certificationType := setupCertifyModel(t)
 	accountRoles := []dclauthtypes.AccountRole{
@@ -165,17 +178,6 @@ func TestHandler_CertifyModelByDifferentRoles(t *testing.T) {
 		_, certifyModelErr := setup.Handler(setup.Ctx, certifyModelMsg)
 		require.ErrorIs(t, certifyModelErr, sdkerrors.ErrUnauthorized)
 	}
-}
-
-func TestHandler_CertifyModelForUnknownModel(t *testing.T) {
-	setup, vid, pid, softwareVersion, softwareVersionString, certificationType := setupCertifyModel(t)
-	nonExistentPid := pid + 1
-
-	setup.setNoModelVersionForKey(vid, nonExistentPid, softwareVersion)
-
-	certifyModelMsg := newMsgCertifyModel(vid, nonExistentPid, softwareVersion, softwareVersionString, certificationType, setup.CertificationCenter)
-	_, certifyModelErr := setup.Handler(setup.Ctx, certifyModelMsg)
-	require.ErrorIs(t, certifyModelErr, modeltypes.ErrModelVersionDoesNotExist)
 }
 
 func TestHandler_CertifyModelWithWrongSoftwareVersionString(t *testing.T) {
