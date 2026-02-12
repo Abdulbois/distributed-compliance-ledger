@@ -332,6 +332,29 @@ func TestMsgAddPkiRevocationDistributionPoint_ValidateBasic(t *testing.T) {
 			err: pkitypes.ErrDataFieldPresented,
 		},
 		{
+			name: "when CrlSignerCertificate size exceeds 2KB",
+			msg: MsgAddPkiRevocationDistributionPoint{
+				Signer: sample.AccAddress(),
+				Vid:    testconstants.PAACertWithNumericVidVid,
+				IsPAA:  true,
+				CrlSignerCertificate: func() string {
+					largeCert := "-----BEGIN CERTIFICATE-----\n"
+					for i := 0; i < 500; i++ {
+						largeCert += "MIIEFzCCAv+gAwIBAgIUAPsN44tYPowXpX0cqFu8p0hcLqAwDQYJKoZIhvcNAQEL\n"
+					}
+					largeCert += "-----END CERTIFICATE-----"
+
+					return largeCert
+				}(),
+				Label:              "label",
+				DataURL:            testconstants.DataURL,
+				IssuerSubjectKeyID: testconstants.SubjectKeyIDWithoutColons,
+				RevocationType:     1,
+				SchemaVersion:      0,
+			},
+			err: validator.ErrFieldMaxLengthExceeded,
+		},
+		{
 			name: "schemaVersion != 0",
 			msg: MsgAddPkiRevocationDistributionPoint{
 				Signer:               sample.AccAddress(),

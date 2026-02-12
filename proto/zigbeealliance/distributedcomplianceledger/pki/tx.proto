@@ -123,9 +123,9 @@ message MsgAddPkiRevocationDistributionPoint {
   string crlSignerCertificate = 6 [(gogoproto.moretags) = "validate:\"required,max=2048\""];
   string issuerSubjectKeyID = 7 [(gogoproto.moretags) = "validate:\"required\""];
   string dataURL = 8 [(gogoproto.moretags) = "validate:\"required,url\""];
-  uint64 dataFileSize = 9 [(gogoproto.moretags) = "validate:\"required_unless=RevocationType 1\""];
-  string dataDigest = 10 [(gogoproto.moretags) = "validate:\"required_with=DataFileSize\""];
-  uint32 dataDigestType = 11 [(gogoproto.moretags) = "validate:\"required_with=DataDigest\""];
+  uint64 dataFileSize = 9;
+  string dataDigest = 10;
+  uint32 dataDigestType = 11;
   uint32 revocationType = 12 [(gogoproto.moretags) = "validate:\"required\""];
   uint32 schemaVersion = 13 [(gogoproto.moretags) = "validate:\"eq=0\""];
   string crlSignerDelegator = 14 [(gogoproto.moretags) = "validate:\"max=2048\""];
