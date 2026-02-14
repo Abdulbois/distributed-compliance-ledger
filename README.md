@@ -232,4 +232,4 @@ the following instructions from [how-to.md](docs/how-to.md) can be used for ever
 - [CometBFT](https://cometbft.com/)
 - [Cosmos SDK](https://cosmos.network/sdk)
 - [Ledger Nano Support](docs/ledger-nano.md)
-- [Schema Mappings against CHIP Specification](docs/mapping_against_chip_spec.md)
+- [Schema Mappings against CHIP Specification](docs/mapping_against_matter_spec.md)
