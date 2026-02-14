@@ -14,6 +14,15 @@ import (
 )
 
 func TestMsgAddPkiRevocationDistributionPoint_ValidateBasic(t *testing.T) {
+	largeCert := func() string {
+		largeCert := "-----BEGIN CERTIFICATE-----\n"
+		for i := 0; i < 32; i++ {
+			largeCert += "MIIEFzCCAv+gAwIBAgIUAPsN44tYPowXpX0cqFu8p0hcLqAwDQYJKoZIhvcNAQEL\n"
+		}
+		largeCert += "-----END CERTIFICATE-----"
+
+		return largeCert
+	}()
 	negativeTests := []struct {
 		name string
 		msg  MsgAddPkiRevocationDistributionPoint
@@ -334,23 +343,31 @@ func TestMsgAddPkiRevocationDistributionPoint_ValidateBasic(t *testing.T) {
 		{
 			name: "when CrlSignerCertificate size exceeds 2KB",
 			msg: MsgAddPkiRevocationDistributionPoint{
-				Signer: sample.AccAddress(),
-				Vid:    testconstants.PAACertWithNumericVidVid,
-				IsPAA:  true,
-				CrlSignerCertificate: func() string {
-					largeCert := "-----BEGIN CERTIFICATE-----\n"
-					for i := 0; i < 500; i++ {
-						largeCert += "MIIEFzCCAv+gAwIBAgIUAPsN44tYPowXpX0cqFu8p0hcLqAwDQYJKoZIhvcNAQEL\n"
-					}
-					largeCert += "-----END CERTIFICATE-----"
-
-					return largeCert
-				}(),
-				Label:              "label",
-				DataURL:            testconstants.DataURL,
-				IssuerSubjectKeyID: testconstants.SubjectKeyIDWithoutColons,
-				RevocationType:     1,
-				SchemaVersion:      0,
+				Signer:               sample.AccAddress(),
+				Vid:                  testconstants.PAACertWithNumericVidVid,
+				IsPAA:                true,
+				CrlSignerCertificate: largeCert,
+				Label:                "label",
+				DataURL:              testconstants.DataURL,
+				IssuerSubjectKeyID:   testconstants.SubjectKeyIDWithoutColons,
+				RevocationType:       1,
+				SchemaVersion:        0,
+			},
+			err: validator.ErrFieldMaxLengthExceeded,
+		},
+		{
+			name: "when CrlSignerDelegator size exceeds 2KB",
+			msg: MsgAddPkiRevocationDistributionPoint{
+				Signer:               sample.AccAddress(),
+				Vid:                  testconstants.PAACertWithNumericVidVid,
+				IsPAA:                true,
+				CrlSignerCertificate: testconstants.PAACertWithNumericVid,
+				Label:                "label",
+				DataURL:              testconstants.DataURL,
+				IssuerSubjectKeyID:   testconstants.SubjectKeyIDWithoutColons,
+				CrlSignerDelegator:   largeCert,
+				RevocationType:       1,
+				SchemaVersion:        0,
 			},
 			err: validator.ErrFieldMaxLengthExceeded,
 		},

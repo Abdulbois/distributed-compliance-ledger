@@ -234,7 +234,7 @@ func ParseAndValidateCertificate(pemCertificate string) (*Certificate, error) {
 		serial := cert.SerialNumber
 		// RFC 5280 requires serial numbers to be positive
 		if serial.Sign() <= 0 {
-			return pkitypes.NewErrInvalidCertificate("Serial number must be a positive")
+			return pkitypes.NewErrInvalidCertificate("serial number must be a positive")
 		}
 
 		// Check for the 20-octet limit (160 bits)
@@ -243,7 +243,7 @@ func ParseAndValidateCertificate(pemCertificate string) (*Certificate, error) {
 		// To ensure the TOTAL encoding is <= 20 octets, the bit length
 		// must be 159 bits or fewer.
 		if serial.BitLen() > 159 {
-			return pkitypes.NewErrInvalidCertificate("Serial number exceeds 20-octet DER encoding limit")
+			return pkitypes.NewErrInvalidCertificate("serial number exceeds 20-octet DER encoding limit")
 		}
 
 		return nil
