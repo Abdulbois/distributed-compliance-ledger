@@ -87,7 +87,7 @@ func (k msgServer) CreateModel(goCtx context.Context, msg *types.MsgCreateModel)
 		model.EnhancedSetupFlowTCRevision = msg.EnhancedSetupFlowTCRevision
 		model.EnhancedSetupFlowTCDigest = msg.EnhancedSetupFlowTCDigest
 		model.EnhancedSetupFlowTCFileSize = msg.EnhancedSetupFlowTCFileSize
-		model.MaintenanceUrl = msg.MaintenanceUrl
+		model.EnhancedSetupFlowMaintenanceUrl = msg.EnhancedSetupFlowMaintenanceUrl
 	}
 
 	// store new model
@@ -183,7 +183,7 @@ func (k msgServer) UpdateModel(goCtx context.Context, msg *types.MsgUpdateModel)
 		model.EnhancedSetupFlowTCUrl = msg.EnhancedSetupFlowTCUrl
 		model.EnhancedSetupFlowTCDigest = msg.EnhancedSetupFlowTCDigest
 		model.EnhancedSetupFlowTCFileSize = msg.EnhancedSetupFlowTCFileSize
-		model.MaintenanceUrl = msg.MaintenanceUrl
+		model.EnhancedSetupFlowMaintenanceUrl = msg.EnhancedSetupFlowMaintenanceUrl
 
 		if model.EnhancedSetupFlowTCRevision == 0 ||
 			msg.EnhancedSetupFlowTCRevision == model.EnhancedSetupFlowTCRevision+1 {
