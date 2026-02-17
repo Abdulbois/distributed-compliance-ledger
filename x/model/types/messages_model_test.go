@@ -402,7 +402,7 @@ func TestMsgCreateModel_ValidateBasic(t *testing.T) {
 			err: validator.ErrFieldMaxLengthExceeded,
 		},
 		{
-			name: "EnhancedSetupFlowTCUrl, EnhancedSetupFlowTCRevision, EnhancedSetupFlowTCDigest, EnhancedSetupFlowTCFileSize and MaintenanceUrl are omitted when EnhancedSetupFlowOptions&1 == 1",
+			name: "EnhancedSetupFlowTCUrl, EnhancedSetupFlowTCRevision, EnhancedSetupFlowTCDigest, EnhancedSetupFlowTCFileSize and EnhancedSetupFlowMaintenanceUrl are omitted when EnhancedSetupFlowOptions&1 == 1",
 			msg: func(msg *MsgCreateModel) *MsgCreateModel {
 				msg.EnhancedSetupFlowOptions = 1
 				msg.EnhancedSetupFlowTCUrl = ""
@@ -456,7 +456,7 @@ func TestMsgCreateModel_ValidateBasic(t *testing.T) {
 			err: validator.ErrRequiredFieldMissing,
 		},
 		{
-			name: "MaintenanceUrl is omitted when EnhancedSetupFlowOptions&1 == 1",
+			name: "EnhancedSetupFlowMaintenanceUrl is omitted when EnhancedSetupFlowOptions&1 == 1",
 			msg: func(msg *MsgCreateModel) *MsgCreateModel {
 				msg.EnhancedSetupFlowOptions = 1
 				msg.EnhancedSetupFlowMaintenanceUrl = ""
@@ -466,7 +466,7 @@ func TestMsgCreateModel_ValidateBasic(t *testing.T) {
 			err: validator.ErrRequiredFieldMissing,
 		},
 		{
-			name: "EnhancedSetupFlowTCUrl, EnhancedSetupFlowTCRevision, EnhancedSetupFlowTCDigest, EnhancedSetupFlowTCFileSize and MaintenanceUrl are specified when EnhancedSetupFlowOptions&1 == 0",
+			name: "EnhancedSetupFlowTCUrl, EnhancedSetupFlowTCRevision, EnhancedSetupFlowTCDigest, EnhancedSetupFlowTCFileSize and EnhancedSetupFlowMaintenanceUrl are specified when EnhancedSetupFlowOptions&1 == 0",
 			msg: func(msg *MsgCreateModel) *MsgCreateModel {
 				msg.EnhancedSetupFlowOptions = 0
 
@@ -489,7 +489,7 @@ func TestMsgCreateModel_ValidateBasic(t *testing.T) {
 			err: ErrFieldIsNotBase64Encoded,
 		},
 		{
-			name: "MaintenanceUrl starts not with https:",
+			name: "EnhancedSetupFlowMaintenanceUrl starts not with https:",
 			msg: func(msg *MsgCreateModel) *MsgCreateModel {
 				msg.EnhancedSetupFlowOptions = 1
 				msg.EnhancedSetupFlowTCFileSize = 1
@@ -503,7 +503,7 @@ func TestMsgCreateModel_ValidateBasic(t *testing.T) {
 			err: validator.ErrFieldNotValid,
 		},
 		{
-			name: "MaintenanceUrl starts with non-http",
+			name: "EnhancedSetupFlowMaintenanceUrl starts with non-http",
 			msg: func(msg *MsgCreateModel) *MsgCreateModel {
 				msg.EnhancedSetupFlowOptions = 1
 				msg.EnhancedSetupFlowTCFileSize = 1
@@ -517,7 +517,7 @@ func TestMsgCreateModel_ValidateBasic(t *testing.T) {
 			err: validator.ErrFieldNotValid,
 		},
 		{
-			name: "MaintenanceUrl length > 256",
+			name: "EnhancedSetupFlowMaintenanceUrl length > 256",
 			msg: func(msg *MsgCreateModel) *MsgCreateModel {
 				msg.EnhancedSetupFlowOptions = 1
 				msg.EnhancedSetupFlowTCFileSize = 1
@@ -916,7 +916,7 @@ func TestMsgCreateModel_ValidateBasic(t *testing.T) {
 			}(validMsgCreateModel()),
 		},
 		{
-			name: "EnhancedSetupFlowOptions&1 == 0 and EnhancedSetupFlowTCUrl, EnhancedSetupFlowTCRevision, EnhancedSetupFlowTCDigest, EnhancedSetupFlowTCFileSize and MaintenanceUrl are omitted",
+			name: "EnhancedSetupFlowOptions&1 == 0 and EnhancedSetupFlowTCUrl, EnhancedSetupFlowTCRevision, EnhancedSetupFlowTCDigest, EnhancedSetupFlowTCFileSize and EnhancedSetupFlowMaintenanceUrl are omitted",
 			msg: func(msg *MsgCreateModel) *MsgCreateModel {
 				msg.EnhancedSetupFlowOptions = 0
 				msg.EnhancedSetupFlowTCUrl = ""
@@ -929,7 +929,7 @@ func TestMsgCreateModel_ValidateBasic(t *testing.T) {
 			}(validMsgCreateModel()),
 		},
 		{
-			name: "EnhancedSetupFlowOptions&1 == 1 and EnhancedSetupFlowTCUrl, EnhancedSetupFlowTCRevision, EnhancedSetupFlowTCDigest, EnhancedSetupFlowTCFileSize and MaintenanceUrl are valid",
+			name: "EnhancedSetupFlowOptions&1 == 1 and EnhancedSetupFlowTCUrl, EnhancedSetupFlowTCRevision, EnhancedSetupFlowTCDigest, EnhancedSetupFlowTCFileSize and EnhancedSetupFlowMaintenanceUrl are valid",
 			msg: func(msg *MsgCreateModel) *MsgCreateModel {
 				msg.EnhancedSetupFlowOptions = 1
 				msg.EnhancedSetupFlowTCUrl = "https://sampleflowurl.dclauth/" + tmrand.Str(256-30) // length = 256
@@ -1294,7 +1294,7 @@ func TestMsgUpdateModel_ValidateBasic(t *testing.T) {
 			err: validator.ErrFieldMaxLengthExceeded,
 		},
 		{
-			name: "EnhancedSetupFlowTCUrl, EnhancedSetupFlowTCRevision, EnhancedSetupFlowTCDigest, EnhancedSetupFlowTCFileSize and MaintenanceUrl are omitted when EnhancedSetupFlowOptions&1 == 1",
+			name: "EnhancedSetupFlowTCUrl, EnhancedSetupFlowTCRevision, EnhancedSetupFlowTCDigest, EnhancedSetupFlowTCFileSize and EnhancedSetupFlowMaintenanceUrl are omitted when EnhancedSetupFlowOptions&1 == 1",
 			msg: func(msg *MsgUpdateModel) *MsgUpdateModel {
 				msg.EnhancedSetupFlowOptions = 1
 				msg.EnhancedSetupFlowTCUrl = ""
@@ -1348,7 +1348,7 @@ func TestMsgUpdateModel_ValidateBasic(t *testing.T) {
 			err: validator.ErrRequiredFieldMissing,
 		},
 		{
-			name: "MaintenanceUrl is omitted when EnhancedSetupFlowOptions&1 == 1",
+			name: "EnhancedSetupFlowMaintenanceUrl is omitted when EnhancedSetupFlowOptions&1 == 1",
 			msg: func(msg *MsgUpdateModel) *MsgUpdateModel {
 				msg.EnhancedSetupFlowOptions = 1
 				msg.EnhancedSetupFlowMaintenanceUrl = ""
@@ -1358,7 +1358,7 @@ func TestMsgUpdateModel_ValidateBasic(t *testing.T) {
 			err: validator.ErrRequiredFieldMissing,
 		},
 		{
-			name: "EnhancedSetupFlowTCUrl, EnhancedSetupFlowTCRevision, EnhancedSetupFlowTCDigest, EnhancedSetupFlowTCFileSize and MaintenanceUrl are specified when EnhancedSetupFlowOptions&1 == 0",
+			name: "EnhancedSetupFlowTCUrl, EnhancedSetupFlowTCRevision, EnhancedSetupFlowTCDigest, EnhancedSetupFlowTCFileSize and EnhancedSetupFlowMaintenanceUrl are specified when EnhancedSetupFlowOptions&1 == 0",
 			msg: func(msg *MsgUpdateModel) *MsgUpdateModel {
 				msg.EnhancedSetupFlowOptions = 0
 
@@ -1397,7 +1397,7 @@ func TestMsgUpdateModel_ValidateBasic(t *testing.T) {
 			err: validator.ErrRequiredFieldMissing,
 		},
 		{
-			name: "EnhancedSetupFlowOptions = 0, but MaintenanceUrl is set",
+			name: "EnhancedSetupFlowOptions = 0, but EnhancedSetupFlowMaintenanceUrl is set",
 			msg: func(msg *MsgUpdateModel) *MsgUpdateModel {
 				msg.EnhancedSetupFlowOptions = 0
 				msg.EnhancedSetupFlowMaintenanceUrl = "https://sampleflowurl.dclmodel"
@@ -1431,7 +1431,7 @@ func TestMsgUpdateModel_ValidateBasic(t *testing.T) {
 			err: ErrFieldIsNotBase64Encoded,
 		},
 		{
-			name: "MaintenanceUrl starts not with https:",
+			name: "EnhancedSetupFlowMaintenanceUrl starts not with https:",
 			msg: func(msg *MsgUpdateModel) *MsgUpdateModel {
 				msg.EnhancedSetupFlowOptions = 1
 				msg.EnhancedSetupFlowTCFileSize = 1
@@ -1445,7 +1445,7 @@ func TestMsgUpdateModel_ValidateBasic(t *testing.T) {
 			err: validator.ErrFieldNotValid,
 		},
 		{
-			name: "MaintenanceUrl starts with non-http:",
+			name: "EnhancedSetupFlowMaintenanceUrl starts with non-http:",
 			msg: func(msg *MsgUpdateModel) *MsgUpdateModel {
 				msg.EnhancedSetupFlowOptions = 1
 				msg.EnhancedSetupFlowTCFileSize = 1
@@ -1459,7 +1459,7 @@ func TestMsgUpdateModel_ValidateBasic(t *testing.T) {
 			err: validator.ErrFieldNotValid,
 		},
 		{
-			name: "MaintenanceUrl length > 256",
+			name: "EnhancedSetupFlowMaintenanceUrl length > 256",
 			msg: func(msg *MsgUpdateModel) *MsgUpdateModel {
 				msg.EnhancedSetupFlowOptions = 1
 				msg.EnhancedSetupFlowTCFileSize = 1
@@ -1754,13 +1754,13 @@ func TestMsgUpdateModel_ValidateBasic(t *testing.T) {
 			}(validMsgUpdateModel()),
 		},
 		{
-			name: "EnhancedSetupFlowOptions is valid and EnhancedSetupFlowTCUrl, EnhancedSetupFlowTCRevision, EnhancedSetupFlowTCDigest, EnhancedSetupFlowTCFileSize and MaintenanceUrl are omitted",
+			name: "EnhancedSetupFlowOptions is valid and EnhancedSetupFlowTCUrl, EnhancedSetupFlowTCRevision, EnhancedSetupFlowTCDigest, EnhancedSetupFlowTCFileSize and EnhancedSetupFlowMaintenanceUrl are omitted",
 			msg: func(msg *MsgUpdateModel) *MsgUpdateModel {
 				return msg
 			}(validMsgUpdateModel()),
 		},
 		{
-			name: "EnhancedSetupFlowOptions&1 == 1 and EnhancedSetupFlowTCUrl, EnhancedSetupFlowTCRevision, EnhancedSetupFlowTCDigest, EnhancedSetupFlowTCFileSize and MaintenanceUrl are valid",
+			name: "EnhancedSetupFlowOptions&1 == 1 and EnhancedSetupFlowTCUrl, EnhancedSetupFlowTCRevision, EnhancedSetupFlowTCDigest, EnhancedSetupFlowTCFileSize and EnhancedSetupFlowMaintenanceUrl are valid",
 			msg: func(msg *MsgUpdateModel) *MsgUpdateModel {
 				msg.EnhancedSetupFlowOptions = 1
 				msg.EnhancedSetupFlowTCUrl = "https://sampleflowurl.dclauth/" + tmrand.Str(256-30) // length = 256
@@ -1773,7 +1773,7 @@ func TestMsgUpdateModel_ValidateBasic(t *testing.T) {
 			}(validMsgUpdateModel()),
 		},
 		{
-			name: "EnhancedSetupFlowOptions&1 == 0 and EnhancedSetupFlowTCUrl, EnhancedSetupFlowTCRevision, EnhancedSetupFlowTCDigest, EnhancedSetupFlowTCFileSize and MaintenanceUrl are not set",
+			name: "EnhancedSetupFlowOptions&1 == 0 and EnhancedSetupFlowTCUrl, EnhancedSetupFlowTCRevision, EnhancedSetupFlowTCDigest, EnhancedSetupFlowTCFileSize and EnhancedSetupFlowMaintenanceUrl are not set",
 			msg: func(msg *MsgUpdateModel) *MsgUpdateModel {
 				msg.EnhancedSetupFlowOptions = 0
 				msg.EnhancedSetupFlowTCUrl = ""
@@ -1973,7 +1973,7 @@ func validMsgCreateModel() *MsgCreateModel {
 		EnhancedSetupFlowTCRevision:                int32(testconstants.EnhancedSetupFlowTCRevision),
 		EnhancedSetupFlowTCDigest:                  testconstants.EnhancedSetupFlowTCDigest,
 		EnhancedSetupFlowTCFileSize:                uint32(testconstants.EnhancedSetupFlowTCFileSize),
-		EnhancedSetupFlowMaintenanceUrl:            testconstants.MaintenanceURL,
+		EnhancedSetupFlowMaintenanceUrl:            testconstants.EnhancedSetupFlowMaintenanceURL,
 	}
 }
 
@@ -2000,6 +2000,6 @@ func validMsgUpdateModel() *MsgUpdateModel {
 		EnhancedSetupFlowTCRevision:                int32(testconstants.EnhancedSetupFlowTCRevision + 1),
 		EnhancedSetupFlowTCDigest:                  testconstants.EnhancedSetupFlowTCDigest,
 		EnhancedSetupFlowTCFileSize:                uint32(testconstants.EnhancedSetupFlowTCFileSize + 1),
-		EnhancedSetupFlowMaintenanceUrl:            testconstants.MaintenanceURL + "/updated",
+		EnhancedSetupFlowMaintenanceUrl:            testconstants.EnhancedSetupFlowMaintenanceURL + "/updated",
 	}
 }
