@@ -144,9 +144,9 @@ func TestMsgCreateModel_ValidateBasic(t *testing.T) {
 			err: validator.ErrFieldMaxLengthExceeded,
 		},
 		{
-			name: "DiscoveryCapabilitiesBitmask > 14",
+			name: "DiscoveryCapabilitiesBitmask > 30",
 			msg: func(msg *MsgCreateModel) *MsgCreateModel {
-				msg.DiscoveryCapabilitiesBitmask = 15
+				msg.DiscoveryCapabilitiesBitmask = 31
 
 				return msg
 			}(validMsgCreateModel()),
@@ -674,9 +674,9 @@ func TestMsgCreateModel_ValidateBasic(t *testing.T) {
 			}(validMsgCreateModel()),
 		},
 		{
-			name: "DiscoveryCapabilitiesBitmask == 14",
+			name: "DiscoveryCapabilitiesBitmask == 30",
 			msg: func(msg *MsgCreateModel) *MsgCreateModel {
-				msg.DiscoveryCapabilitiesBitmask = 14
+				msg.DiscoveryCapabilitiesBitmask = 30
 
 				return msg
 			}(validMsgCreateModel()),
