@@ -14,15 +14,6 @@ import (
 )
 
 func TestMsgAddPkiRevocationDistributionPoint_ValidateBasic(t *testing.T) {
-	largeCert := func() string {
-		largeCert := "-----BEGIN CERTIFICATE-----\n"
-		for i := 0; i < 32; i++ {
-			largeCert += "MIIEFzCCAv+gAwIBAgIUAPsN44tYPowXpX0cqFu8p0hcLqAwDQYJKoZIhvcNAQEL\n"
-		}
-		largeCert += "-----END CERTIFICATE-----"
-
-		return largeCert
-	}()
 	negativeTests := []struct {
 		name string
 		msg  MsgAddPkiRevocationDistributionPoint
@@ -346,7 +337,7 @@ func TestMsgAddPkiRevocationDistributionPoint_ValidateBasic(t *testing.T) {
 				Signer:               sample.AccAddress(),
 				Vid:                  testconstants.PAACertWithNumericVidVid,
 				IsPAA:                true,
-				CrlSignerCertificate: largeCert,
+				CrlSignerCertificate: testconstants.CertWithSizeGreater2KB,
 				Label:                "label",
 				DataURL:              testconstants.DataURL,
 				IssuerSubjectKeyID:   testconstants.SubjectKeyIDWithoutColons,
@@ -365,7 +356,7 @@ func TestMsgAddPkiRevocationDistributionPoint_ValidateBasic(t *testing.T) {
 				Label:                "label",
 				DataURL:              testconstants.DataURL,
 				IssuerSubjectKeyID:   testconstants.SubjectKeyIDWithoutColons,
-				CrlSignerDelegator:   largeCert,
+				CrlSignerDelegator:   testconstants.CertWithSizeGreater2KB,
 				RevocationType:       1,
 				SchemaVersion:        0,
 			},
