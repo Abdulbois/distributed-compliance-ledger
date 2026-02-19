@@ -237,13 +237,10 @@ func ParseAndValidateCertificate(pemCertificate string) (*Certificate, error) {
 			return pkitypes.NewErrInvalidCertificate("serial number must be a positive")
 		}
 
-		// Check for the 20-octet limit (160 bits)
-		// In ASN.1 DER encoding, if the most significant bit of the integer
-		// is 1, a leading zero byte (0x00) is added to keep it positive.
-		// To ensure the TOTAL encoding is <= 20 octets, the bit length
-		// must be 159 bits or fewer.
-		if serial.BitLen() > 159 {
-			return pkitypes.NewErrInvalidCertificate("serial number exceeds 20-octet DER encoding limit")
+		// When crypto/x509 parses a certificate, it reads the DER integer, strips the sign byte if present,
+		// then returns the minimal magnitude in octets (no leading zeros).
+		if len(serial.Bytes()) > 20 {
+			return pkitypes.NewErrInvalidCertificate("serial number exceeds 20-octet limit")
 		}
 
 		return nil

@@ -122,9 +122,9 @@ message MsgAddPkiRevocationDistributionPoint {
   string label = 5 [(gogoproto.moretags) = "validate:\"required\""];
   string crlSignerCertificate = 6 [(gogoproto.moretags) = "validate:\"required,max=2048\""];
   string issuerSubjectKeyID = 7 [(gogoproto.moretags) = "validate:\"required\""];
-  string dataURL = 8 [(gogoproto.moretags) = "validate:\"required,url\""];
+  string dataURL = 8 [(gogoproto.moretags) = "validate:\"required,url,max=256\""];
   uint64 dataFileSize = 9;
-  string dataDigest = 10;
+  string dataDigest = 10 [(gogoproto.moretags) = "validate:\"max=128\""];
   uint32 dataDigestType = 11;
   uint32 revocationType = 12 [(gogoproto.moretags) = "validate:\"required\""];
   uint32 schemaVersion = 13 [(gogoproto.moretags) = "validate:\"eq=0\""];
@@ -142,7 +142,7 @@ message MsgUpdatePkiRevocationDistributionPoint {
   string issuerSubjectKeyID = 5 [(gogoproto.moretags) = "validate:\"required\""];
   string dataURL = 6 [(gogoproto.moretags) = "validate:\"omitempty,url,max=256\""];
   uint64 dataFileSize = 7;
-  string dataDigest = 8;
+  string dataDigest = 8 [(gogoproto.moretags) = "validate:\"max=128\""];
   uint32 dataDigestType = 9;
   uint32 schemaVersion = 10 [(gogoproto.moretags) = "validate:\"eq=0\""];
   string crlSignerDelegator = 11 [(gogoproto.moretags) = "validate:\"max=2048\""];
