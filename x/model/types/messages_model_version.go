@@ -91,6 +91,13 @@ func (msg *MsgCreateModelVersion) ValidateBasic() error {
 		return NewErrOtaChecksumIsNotBase64Encoded(msg.OtaChecksum)
 	}
 
+	if msg.OtaUrl != "" {
+		err = msg.validateOtaChecksumType()
+		if err != nil {
+			return err
+		}
+	}
+
 	err = validator.Validate(msg)
 	if err != nil {
 		return err
@@ -219,4 +226,15 @@ func (msg *MsgDeleteModelVersion) ValidateBasic() error {
 	}
 
 	return nil
+}
+
+var allowedOtaChecksumTypes = [6]uint32{1, 7, 8, 10, 11, 12}
+
+func (msg *MsgCreateModelVersion) validateOtaChecksumType() error {
+	for _, allowedOtaChecksumType := range allowedOtaChecksumTypes {
+		if allowedOtaChecksumType == uint32(msg.OtaChecksumType) {
+			return nil
+		}
+	}
+	return NewErrUnsupportedOtaChecksumType(msg.OtaChecksumType)
 }

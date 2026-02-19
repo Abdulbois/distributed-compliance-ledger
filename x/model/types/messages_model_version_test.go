@@ -208,7 +208,7 @@ func TestMsgCreateModelVersion_ValidateBasic(t *testing.T) {
 
 				return msg
 			}(validMsgCreateModelVersion()),
-			err: validator.ErrRequiredFieldMissing,
+			err: ErrUnsupportedOtaChecksumType,
 		},
 		{
 			name: "OtaChecksumType < 0",
@@ -217,16 +217,16 @@ func TestMsgCreateModelVersion_ValidateBasic(t *testing.T) {
 
 				return msg
 			}(validMsgCreateModelVersion()),
-			err: validator.ErrFieldLowerBoundViolated,
+			err: ErrUnsupportedOtaChecksumType,
 		},
 		{
-			name: "OtaChecksumType > 65535",
+			name: "OtaChecksumType is unsupported, OtaChecksumType = 13",
 			msg: func(msg *MsgCreateModelVersion) *MsgCreateModelVersion {
-				msg.OtaChecksumType = 65536
+				msg.OtaChecksumType = 13
 
 				return msg
 			}(validMsgCreateModelVersion()),
-			err: validator.ErrFieldUpperBoundViolated,
+			err: ErrUnsupportedOtaChecksumType,
 		},
 		{
 			name: "MinApplicableSoftwareVersion > MaxApplicableSoftwareVersion " +
@@ -496,9 +496,9 @@ func TestMsgCreateModelVersion_ValidateBasic(t *testing.T) {
 			}(validMsgCreateModelVersion()),
 		},
 		{
-			name: "OtaChecksumType == 65535",
+			name: "OtaChecksumType == 12",
 			msg: func(msg *MsgCreateModelVersion) *MsgCreateModelVersion {
-				msg.OtaChecksumType = 65535
+				msg.OtaChecksumType = 12
 
 				return msg
 			}(validMsgCreateModelVersion()),
