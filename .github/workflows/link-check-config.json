@@ -1,7 +1,13 @@
 {
   "ignorePatterns": [
     {
-      "pattern": "^https://github.com/CHIP-Specifications/connectedhomeip-spec/"
+      "pattern": "^https://github.com/CHIP-Specifications/connectedhomeip-spec"
+    },
+    {
+      "pattern": "https://github\\.com/CHIP-Specifications/connectedhomeip-spec/.*"
+    },
+    {
+      "pattern": "https://github\\.com/CHIP-Specifications/connectedhomeip-spec"
     }
   ]
 }
