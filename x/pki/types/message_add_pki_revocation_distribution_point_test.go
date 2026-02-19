@@ -204,6 +204,27 @@ func TestMsgAddPkiRevocationDistributionPoint_ValidateBasic(t *testing.T) {
 			err: validator.ErrFieldNotValid,
 		},
 		{
+			name: "dataURL length > 256",
+			msg: MsgAddPkiRevocationDistributionPoint{
+				Signer:               sample.AccAddress(),
+				Vid:                  testconstants.PAACertWithNumericVidVid,
+				CrlSignerCertificate: testconstants.PAACertWithNumericVid,
+				Label:                "label",
+				DataURL: func() string {
+					longUrl := testconstants.DataURL
+					for i := 0; i < 29; i++ {
+						longUrl += "/longurl"
+					}
+
+					return longUrl
+				}(),
+				IssuerSubjectKeyID: testconstants.SubjectKeyIDWithoutColons,
+				RevocationType:     1,
+				SchemaVersion:      0,
+			},
+			err: validator.ErrFieldMaxLengthExceeded,
+		},
+		{
 			name: "dataDigest presented, DataFileSize not presented",
 			msg: MsgAddPkiRevocationDistributionPoint{
 				Signer:               sample.AccAddress(),
@@ -267,6 +288,31 @@ func TestMsgAddPkiRevocationDistributionPoint_ValidateBasic(t *testing.T) {
 				SchemaVersion:        0,
 			},
 			err: pkitypes.ErrEmptyDataDigestType,
+		},
+		{
+			name: "dataDigest length > 128",
+			msg: MsgAddPkiRevocationDistributionPoint{
+				Signer:               sample.AccAddress(),
+				Vid:                  testconstants.PAACertWithNumericVidVid,
+				IsPAA:                true,
+				CrlSignerCertificate: testconstants.PAACertWithNumericVid,
+				Label:                "label",
+				DataURL:              testconstants.DataURL,
+				IssuerSubjectKeyID:   testconstants.SubjectKeyIDWithoutColons,
+				DataDigest: func() string {
+					longDataDigest := testconstants.DataDigest
+					for i := 0; i < 5; i++ {
+						longDataDigest += testconstants.DataDigest
+					}
+
+					return longDataDigest
+				}(),
+				DataDigestType: 1,
+				DataFileSize:   123,
+				RevocationType: 1,
+				SchemaVersion:  0,
+			},
+			err: validator.ErrFieldMaxLengthExceeded,
 		},
 		{
 			name: "wrong IssuerSubjectKeyID format (not [0-9A-F])",
