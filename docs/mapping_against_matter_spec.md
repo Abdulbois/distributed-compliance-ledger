@@ -1,6 +1,6 @@
 # Mapping DCL Schemas to Matter Specification
 
-This document describes how DCL records and entities map to the CHIP/Matter specification.
+This document describes how DCL records and entities map to the CHIP/Matter [specification](https://github.com/CHIP-Specifications/connectedhomeip-spec/blob/master/src/service_device_management/DistributedComplianceLedger.adoc#ref_DistributedComplianceLedger).
 
 ## PKI Module
 
