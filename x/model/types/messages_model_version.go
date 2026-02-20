@@ -236,5 +236,6 @@ func (msg *MsgCreateModelVersion) validateOtaChecksumType() error {
 			return nil
 		}
 	}
+
 	return NewErrUnsupportedOtaChecksumType(msg.OtaChecksumType)
 }
