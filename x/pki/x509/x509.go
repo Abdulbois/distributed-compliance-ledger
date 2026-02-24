@@ -47,7 +47,9 @@ const (
 	MaxSubjectFields = 50
 )
 
-func DecodeX509Certificate(pemCertificate string) (*Certificate, error) {
+type DecodeX509CertVerificationOptions func(cert *x509.Certificate) error
+
+func DecodeX509Certificate(pemCertificate string, options ...DecodeX509CertVerificationOptions) (*Certificate, error) {
 	block, _ := pem.Decode([]byte(pemCertificate))
 	if block == nil {
 		return nil, pkitypes.NewErrInvalidCertificate("Could not decode pem certificate")
@@ -56,6 +58,13 @@ func DecodeX509Certificate(pemCertificate string) (*Certificate, error) {
 	cert, err := x509.ParseCertificate(block.Bytes)
 	if err != nil {
 		return nil, pkitypes.NewErrInvalidCertificate(fmt.Sprintf("Could not parse certificate: %v", err.Error()))
+	}
+
+	for _, option := range options {
+		err = option(cert)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	certificate := Certificate{
@@ -221,8 +230,24 @@ func ParseAndValidateCertificate(pemCertificate string) (*Certificate, error) {
 		return nil, pkitypes.NewErrInvalidCertificate(fmt.Sprintf("certificate size (%d bytes) exceeds maximum limit of %d bytes", len(pemCertificate), MaxCertSize))
 	}
 
+	serialNumberVerification := func(cert *x509.Certificate) error {
+		serial := cert.SerialNumber
+		// RFC 5280 requires serial numbers to be positive
+		if serial.Sign() <= 0 {
+			return pkitypes.NewErrInvalidCertificate("serial number must be a positive")
+		}
+
+		// When crypto/x509 parses a certificate, it reads the DER integer, strips the sign byte if present,
+		// then returns the minimal magnitude in octets (no leading zeros).
+		if len(serial.Bytes()) > 20 {
+			return pkitypes.NewErrInvalidCertificate("serial number exceeds 20-octet limit")
+		}
+
+		return nil
+	}
+
 	// Parse the certificate
-	cert, err := DecodeX509Certificate(pemCertificate)
+	cert, err := DecodeX509Certificate(pemCertificate, serialNumberVerification)
 	if err != nil {
 		return nil, pkitypes.NewErrInvalidCertificate(fmt.Sprintf("failed to parse certificate: %v", err))
 	}

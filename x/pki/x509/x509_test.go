@@ -306,6 +306,16 @@ func Test_ParseAndValidateCertificate(t *testing.T) {
 			}(),
 			expectErrorSubstr: "exceeds maximum limit",
 		},
+		{
+			name:              "certificate serial number exceeds 20 octets",
+			certPem:           testconstants.CertWithSerialNumber21octets,
+			expectErrorSubstr: "serial number exceeds",
+		},
+		{
+			name:              "certificate serial number is negative",
+			certPem:           testconstants.CertWithInvalidSerialNumber,
+			expectErrorSubstr: "serial number must be a positive",
+		},
 	}
 
 	for _, tt := range positiveTests {

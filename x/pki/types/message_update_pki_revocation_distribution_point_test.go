@@ -113,6 +113,26 @@ func TestMsgUpdatePkiRevocationDistributionPoint_ValidateBasic(t *testing.T) {
 			err: validator.ErrFieldNotValid,
 		},
 		{
+			name: "dataURL length > 256",
+			msg: MsgUpdatePkiRevocationDistributionPoint{
+				Signer:               sample.AccAddress(),
+				Vid:                  testconstants.PAACertWithNumericVidVid,
+				CrlSignerCertificate: testconstants.PAACertWithNumericVid,
+				Label:                "label",
+				DataURL: func() string {
+					longUrl := testconstants.DataURL
+					for i := 0; i < 29; i++ {
+						longUrl += "/longurl"
+					}
+
+					return longUrl
+				}(),
+				IssuerSubjectKeyID: testconstants.SubjectKeyIDWithoutColons,
+				SchemaVersion:      0,
+			},
+			err: validator.ErrFieldMaxLengthExceeded,
+		},
+		{
 			name: "dataDigest presented, DataFileSize not presented",
 			msg: MsgUpdatePkiRevocationDistributionPoint{
 				Signer:               sample.AccAddress(),
@@ -156,6 +176,28 @@ func TestMsgUpdatePkiRevocationDistributionPoint_ValidateBasic(t *testing.T) {
 			err: pkitypes.ErrEmptyDataDigestType,
 		},
 		{
+			name: "dataDigest length > 128",
+			msg: MsgUpdatePkiRevocationDistributionPoint{
+				Signer:               sample.AccAddress(),
+				Vid:                  testconstants.Vid,
+				CrlSignerCertificate: testconstants.RootCertPem,
+				Label:                "label",
+				DataURL:              testconstants.DataURL,
+				IssuerSubjectKeyID:   testconstants.SubjectKeyIDWithoutColons,
+				DataDigestType:       1,
+				DataDigest: func() string {
+					longDataDigest := testconstants.DataDigest
+					for i := 0; i < 5; i++ {
+						longDataDigest += testconstants.DataDigest
+					}
+
+					return longDataDigest
+				}(), DataFileSize: 123,
+				SchemaVersion: 0,
+			},
+			err: validator.ErrFieldMaxLengthExceeded,
+		},
+		{
 			name: "wrong IssuerSubjectKeyID format (not [0-9A-F])",
 			msg: MsgUpdatePkiRevocationDistributionPoint{
 				Signer:               sample.AccAddress(),
@@ -193,6 +235,33 @@ func TestMsgUpdatePkiRevocationDistributionPoint_ValidateBasic(t *testing.T) {
 				SchemaVersion:        0,
 			},
 			err: pkitypes.ErrWrongSubjectKeyIDFormat,
+		},
+		{
+			name: "when CrlSignerCertificate size exceeds 2KB",
+			msg: MsgUpdatePkiRevocationDistributionPoint{
+				Signer:               sample.AccAddress(),
+				Vid:                  testconstants.Vid,
+				CrlSignerCertificate: testconstants.CertWithSizeGreater2KB,
+				Label:                "label",
+				DataURL:              testconstants.DataURL,
+				IssuerSubjectKeyID:   testconstants.SubjectKeyIDWithoutColons,
+				SchemaVersion:        0,
+			},
+			err: validator.ErrFieldMaxLengthExceeded,
+		},
+		{
+			name: "when CrlSignerDelegator size exceeds 2KB",
+			msg: MsgUpdatePkiRevocationDistributionPoint{
+				Signer:               sample.AccAddress(),
+				Vid:                  testconstants.PAACertWithNumericVidVid,
+				CrlSignerCertificate: testconstants.PAACertWithNumericVid,
+				Label:                "label",
+				DataURL:              testconstants.DataURL,
+				IssuerSubjectKeyID:   testconstants.SubjectKeyIDWithoutColons,
+				CrlSignerDelegator:   testconstants.CertWithSizeGreater2KB,
+				SchemaVersion:        0,
+			},
+			err: validator.ErrFieldMaxLengthExceeded,
 		},
 		{
 			name: "schemaVersion != 0",
