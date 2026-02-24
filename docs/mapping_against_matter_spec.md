@@ -1,8 +1,8 @@
 # Mapping DCL Schemas to Matter Specification
 
-This document describes how DCL records and entities map to the CHIP/Matter [specification](https://github.com/CHIP-Specifications/connectedhomeip-spec/blob/master/src/service_device_management/DistributedComplianceLedger.adoc#ref_DistributedComplianceLedger).
+This document describes how DCL modules map to the CHIP/Matter [specification](https://github.com/CHIP-Specifications/connectedhomeip-spec/blob/master/src/service_device_management/DistributedComplianceLedger.adoc#ref_DistributedComplianceLedger).
 
-In DCL, different schemas and respective endpoints are used for write(txn messages) and read(query calls) requests, but the CHIP/Matter specification describes only what was written and assumes that
+In DCL, different schemas and respective endpoints are used/implemented for write(txn messages) and read(query calls) requests, but the CHIP/Matter specification describes only what was written and assumes that
 read requests are the same. To know about how write and read requests maps to spec please follow below sections for more details.
 
 ## PKI Module
@@ -15,8 +15,13 @@ read requests are the same. To know about how write and read requests maps to sp
 
 ## Model Module
 
-In DCL, the [Model module](transactions/model.md) is responsible for all functionality mentioned in the **Device Model** and **Device Software Version Model** schemas mentioned in the specification.
+In DCL, the [Model module](transactions/model.md) is responsible to handle records regarding device and device software version models.
 So DCL entities like Model and Model Version map to **Device Model** and **Device Software Version Model** respectively.
 
 1. **Device Model:** The [Device Model schema](https://github.com/CHIP-Specifications/connectedhomeip-spec/blob/master/src/service_device_management/DistributedComplianceLedger.adoc#ref_DeviceModelSchema) corresponds to the endpoints related to Model from the [Model and Model Version section](transactions.md#model-and-model-version).
 2. **Device Software Version Model:** The [Device Software Version Model schema](https://github.com/CHIP-Specifications/connectedhomeip-spec/blob/master/src/service_device_management/DistributedComplianceLedger.adoc#7-devicesoftwareversionmodel-schema) corresponds to the endpoints related to Model Version from the [Model and Model Version section](transactions.md#model-and-model-version).
+
+## Compliance Module
+
+In DCL, the [Compliance module](transactions/compliance.md) is responsible to handle certification status of particular software version(`Model Version` in DCL term) for given product(`Model` in DCL term).
+So [Device Software Compliance / Compliance test result](https://github.com/CHIP-Specifications/connectedhomeip-spec/blob/master/src/service_device_management/DistributedComplianceLedger.adoc#8-devicesoftwarecompliance--compliance-test-result-schema) schema mentioned in spec maps to this Compliance module.
