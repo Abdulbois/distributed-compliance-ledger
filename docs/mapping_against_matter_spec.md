@@ -1,8 +1,8 @@
 # Mapping DCL Schemas to Matter Specification
 
-This document describes how DCL modules map to the CHIP/Matter [specification](https://github.com/CHIP-Specifications/connectedhomeip-spec/blob/master/src/service_device_management/DistributedComplianceLedger.adoc#ref_DistributedComplianceLedger).
+This document describes how DCL records and entities map to the CHIP/Matter [specification](https://github.com/CHIP-Specifications/connectedhomeip-spec/blob/master/src/service_device_management/DistributedComplianceLedger.adoc#ref_DistributedComplianceLedger).
 
-In DCL, different schemas and respective endpoints are used/implemented for write(txn messages) and read(query calls) requests, but the CHIP/Matter specification describes only what was written and assumes that
+In DCL, different schemas and respective endpoints are used for write(txn messages) and read(query calls) requests, but the CHIP/Matter specification describes only what was written and assumes that
 read requests are the same. To know about how write and read requests maps to spec please follow below sections for more details.
 
 ## PKI Module
