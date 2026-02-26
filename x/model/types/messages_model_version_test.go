@@ -229,6 +229,15 @@ func TestMsgCreateModelVersion_ValidateBasic(t *testing.T) {
 			err: ErrUnsupportedOtaChecksumType,
 		},
 		{
+			name: "OtaChecksumType is unsupported - not within supported range, OtaChecksumType = 9",
+			msg: func(msg *MsgCreateModelVersion) *MsgCreateModelVersion {
+				msg.OtaChecksumType = 9
+
+				return msg
+			}(validMsgCreateModelVersion()),
+			err: ErrUnsupportedOtaChecksumType,
+		},
+		{
 			name: "MinApplicableSoftwareVersion > MaxApplicableSoftwareVersion " +
 				"and MaxApplicableSoftwareVersion == 0",
 			msg: func(msg *MsgCreateModelVersion) *MsgCreateModelVersion {

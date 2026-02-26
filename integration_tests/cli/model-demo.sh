@@ -79,7 +79,7 @@ commissioningFallbackUrl="https://url.commissioningfallbackurl.dclmodel"
 discoveryCapabilitiesBitmask=1
 echo "Add Model with VID: $vid_with_pids PID: $pid"
 result=$(echo "test1234" | dcld tx model add-model --vid=$vid_with_pids --pid=$pid --deviceTypeID=1 --productName=TestProduct --productLabel="$productLabel" --partNumber=1 --commissioningCustomFlow=0 --enhancedSetupFlowOptions=$enhancedSetupFlowOptions_1 \
-  --enhancedSetupFlowTCUrl=$enhancedSetupFlowTCUrl --enhancedSetupFlowTCRevision=$enhancedSetupFlowTCRevision --enhancedSetupFlowTCDigest=$enhancedSetupFlowTCDigest --enhancedSetupFlowTCFileSize=$enhancedSetupFlowTCFileSize --enhancedSetupFlowMaintenanceUrl=$maintenanceUrl \
+  --enhancedSetupFlowTCUrl=$enhancedSetupFlowTCUrl --enhancedSetupFlowTCRevision=$enhancedSetupFlowTCRevision --enhancedSetupFlowTCDigest=$enhancedSetupFlowTCDigest --enhancedSetupFlowTCFileSize=$enhancedSetupFlowTCFileSize --enhancedSetupFlowMaintenanceUrl=$enhancedSetupFlowMaintenanceUrl \
   --commissioningFallbackUrl=$commissioningFallbackUrl --discoveryCapabilitiesBitmask=$discoveryCapabilitiesBitmask --from=$vendor_account_with_pids --yes)
 result=$(get_txn_result "$result")
 check_response "$result" "\"code\": 0"
