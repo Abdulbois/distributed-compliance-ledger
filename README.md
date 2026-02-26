@@ -141,7 +141,7 @@ See [Run Light Client Proxy](docs/running-light-client-proxy.md) for details how
 
 - **There are no state proofs in REST, so REST queries should be sent to trusted Validator or Observer nodes only.**
 - OpenAPI specification: <https://zigbee-alliance.github.io/distributed-compliance-ledger/>.
-- Any running node exposes a REST API at port `1317`. See <https://docs.cosmos.network/v0.47/learn/advanced/grpc_rest>.
+- Any running node exposes a REST API at port `1317`. See <https://docs.cosmos.network/sdk/v0.47/learn/advanced/grpc_rest>.
 - See [transactions](docs/transactions.md) for a full list of endpoints.
 - REST HTTP(S) queries can be directly used for read requests.
   See [How to read from the Ledger](docs/transactions.md#how-to-read-from-the-ledger).
@@ -152,14 +152,14 @@ See [Run Light Client Proxy](docs/running-light-client-proxy.md) for details how
 ### gRPC
 
 - **There are no state proofs in gRPC, so gRPC queries should be sent to trusted Validator or Observer nodes only.**
-- Any running node exposes a REST API at port `9090`. See <https://docs.cosmos.network/v0.47/learn/advanced/grpc_rest>.
+- Any running node exposes a REST API at port `9090`. See <https://docs.cosmos.network/sdk/v0.47/learn/advanced/grpc_rest>.
 - A client code can be generated for all popular languages from the proto files [proto](proto), see <https://grpc.io/docs/languages/>.
 - The generated client code can be used for read and write requests, i.e. generation and signing of transactions
   See [How to read from the Ledger](docs/transactions.md#how-to-read-from-the-ledger) and [How to write to the Ledger](docs/transactions.md#how-to-write-to-the-ledger) for details.
 
 ### CometBFT RPC and Light Client
 
-- CometBFT RPC is exposed by every running node  at port `26657`. See <https://docs.cosmos.network/v0.47/learn/advanced/grpc_rest#cometbft-rpc>.
+- CometBFT RPC is exposed by every running node  at port `26657`. See <https://docs.cosmos.network/sdk/v0.47/learn/advanced/grpc_rest#cometbft-rpc>.
 - CometBFT RPC supports state proofs. CometBFT's Light Client library can be used to verify the state proofs.
     So, if Light Client API is used, then it's possible to communicate with non-trusted nodes.
 - Please note, that multi-value queries don't have state proofs support and should be sent to trusted nodes only.
