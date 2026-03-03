@@ -192,6 +192,19 @@ func TestMsgUpdateComplianceInfo_ValidateBasic(t *testing.T) {
 			err: ErrInvalidUint32ForCdVersionNumber,
 		},
 		{
+			name: "reason len > 51200 (50 KB)",
+			msg: MsgUpdateComplianceInfo{
+				Creator:           sample.AccAddress(),
+				Pid:               1,
+				Vid:               1,
+				SoftwareVersion:   testconstants.SoftwareVersion,
+				CertificationType: testconstants.CertificationType,
+				CDCertificateId:   testconstants.CDCertificateID,
+				Reason:            tmrand.Str(51201),
+			},
+			err: validator.ErrFieldMaxLengthExceeded,
+		},
+		{
 			name: "schemaVersion != 0",
 			msg: MsgUpdateComplianceInfo{
 				Creator:           sample.AccAddress(),

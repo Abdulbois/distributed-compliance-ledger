@@ -207,7 +207,7 @@ func TestMsgRevokeModel_ValidateBasic(t *testing.T) {
 			err: validator.ErrFieldMaxLengthExceeded,
 		},
 		{
-			name: "reason len > 102400 (100 KB)",
+			name: "reason len > 51200 (50 KB)",
 			msg: MsgRevokeModel{
 				Signer:                sample.AccAddress(),
 				Pid:                   1,
@@ -216,7 +216,7 @@ func TestMsgRevokeModel_ValidateBasic(t *testing.T) {
 				RevocationDate:        testconstants.CertificationDate,
 				CertificationType:     testconstants.CertificationType,
 				CDVersionNumber:       uint32(testconstants.CdVersionNumber),
-				Reason:                tmrand.Str(102401),
+				Reason:                tmrand.Str(51201),
 			},
 			err: validator.ErrFieldMaxLengthExceeded,
 		},
