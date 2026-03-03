@@ -1,8 +1,8 @@
 # Mapping DCL Schemas to Matter Specification
 
-This document describes how DCL records and entities map to the CHIP/Matter [specification](https://github.com/CHIP-Specifications/connectedhomeip-spec/blob/master/src/service_device_management/DistributedComplianceLedger.adoc#ref_DistributedComplianceLedger).
+This document describes how DCL records and entities map to the Matter [specification](https://github.com/CHIP-Specifications/connectedhomeip-spec/blob/master/src/service_device_management/DistributedComplianceLedger.adoc#ref_DistributedComplianceLedger).
 
-In DCL, different schemas and respective endpoints are used for write (txn messages) and read (query calls) requests, but the CHIP/Matter specification describes only what was written and assumes that read requests are the same. To know about how write and read requests map to spec, please follow the sections below for more details.
+In DCL, different schemas and respective endpoints are used for write (txn messages) and read (query calls) requests, but the Matter specification describes only what was written and assumes that read requests are the same. To know about how write and read requests map to spec, please follow the sections below for more details.
 
 ## PKI Module
 
@@ -25,8 +25,8 @@ In DCL, the [Compliance module](transactions/compliance.md) is responsible to ha
 
 Below is the list of notes to consider while mapping DCL Compliance module to Matter specification:
 1. The [Device Software Compliance schema](https://github.com/CHIP-Specifications/connectedhomeip-spec/blob/master/src/service_device_management/DistributedComplianceLedger.adoc#8-devicesoftwarecompliance--compliance-test-result-schema) corresponds to the [Compliance Info](../proto/zigbeealliance/distributedcomplianceledger/compliance/compliance_info.proto) entity, and the associated `write/read` requests can be found in the [Compliance section](transactions.md#compliance)
-2. In DCL, specific endpoints are used(by CSA) to handle [certification status](https://github.com/CHIP-Specifications/connectedhomeip-spec/blob/master/src/service_device_management/DistributedComplianceLedger.adoc#82-softwareversioncertificationstatusenum-type) of the device software version according to the provided `certificatType`(ZB/Matter):
-   - [Provision](transactions/compliance.md#PROVISION_MODEL) endpoint is used to register that particular device software is in `provisional`(going into certification testing phase) state
+2. In DCL, specific endpoints are used (by CSA) to handle [certification status](https://github.com/CHIP-Specifications/connectedhomeip-spec/blob/master/src/service_device_management/DistributedComplianceLedger.adoc#82-softwareversioncertificationstatusenum-type) of the device software version according to the provided `certificatType`(ZB/Matter):
+   - [Provision](transactions/compliance.md#PROVISION_MODEL) endpoint is used to register that particular device software is in `provisional` (going into certification testing phase) state
    - [Certify](transactions/compliance.md#CERTIFY_MODEL) endpoint is used to register that particular device software version is `compliant`
    - [Revoke](transactions/compliance.md#REVOKE_MODEL_CERTIFICATION) endpoint is used to register that particular device software version is `revoked`
    - [Update](transactions/compliance.md#UPDATE_COMPLIANCE_INFO) endpoint is used to update the additional-info/metadata of a particular device software version. It cannot be used to change the certification status.
