@@ -1,4 +1,4 @@
-# Mapping DCL Schemas to Matter Specification
+# Mapping DCL Entities to Matter Specification
 
 This document describes how DCL records and entities map to the Matter [specification](https://github.com/CHIP-Specifications/connectedhomeip-spec/blob/master/src/service_device_management/DistributedComplianceLedger.adoc#ref_DistributedComplianceLedger).
 
@@ -40,7 +40,3 @@ Below is the list of notes to consider while mapping DCL Compliance module to Ma
    - [Revoked Model](transactions/compliance.md#GET_REVOKED_MODEL) can be used to retrieve/check the software version certification of particular device in `revoked` state
    - [Compliance Info](transactions/compliance.md#GET_COMPLIANCE_INFO) can be used to get the full compliance(including certification state) information of a particular device software version, bypassing state check query calls mentioned above
    - [Device Software Compliance](transactions/compliance.md#GET_DEVICE_SOFTWARE_COMPLIANCE) can be used to get all compliance records associated with [CD Certificate ID](https://github.com/CHIP-Specifications/connectedhomeip-spec/blob/master/src/service_device_management/DistributedComplianceLedger.adoc#83-cdcertificateid)
-
-#### To get more details about DCL, please see or use the below links.
-- [Useful documents](../README.md#useful-links)
-- [Transactions and Queries](transactions.md)

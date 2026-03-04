@@ -15,6 +15,7 @@ See use case sequence diagrams for the examples of how transaction can be used.
    * [Validator Node](#validator-node)
    * [Upgrade](#upgrade)
 5. [Extensions](#extensions)
+6. [Mapping DCL Entities to Matter Specification](mapping_against_matter_spec.md)
 
 ## General
 
