@@ -50,7 +50,7 @@ While offering a robust solution for handling radical changes, this method requi
 **Strategy steps:**
 
 - One time actions:
-  - Create a more flexible, generic schema structure to hold a wide range of data formats (Can be used [Any](https://github.com/protocolbuffers/protobuf/blob/main/src/google/protobuf/any.proto) as described in [ADR-19](https://docs.cosmos.network/v0.47/build/architecture/adr-019-protobuf-state-encoding#usage-of-any-to-encode-interfaces))
+  - Create a more flexible, generic schema structure to hold a wide range of data formats (Can be used [Any](https://github.com/protocolbuffers/protobuf/blob/main/src/google/protobuf/any.proto) as described in [ADR-19](https://docs.cosmos.network/sdk/v0.53/build/architecture/adr-019-protobuf-state-encoding#usage-of-any-to-encode-interfaces))
   - Migrate old states to the newer, generic schema.
   - Remove the states associated with the older schema versions.
   - Optioanlly can be implemented queries for requesting schemas with any return type

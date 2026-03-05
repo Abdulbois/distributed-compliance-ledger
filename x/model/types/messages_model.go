@@ -47,7 +47,7 @@ func NewMsgCreateModel(
 	enhancedSetupFlowTCRevision int32,
 	enhancedSetupFlowTCDigest string,
 	enhancedSetupFlowTCFileSize uint32,
-	maintenanceURL string,
+	enhancedSetupFlowMaintenanceURL string,
 	commissioningFallbackURL string,
 ) *MsgCreateModel {
 	return &MsgCreateModel{
@@ -78,7 +78,7 @@ func NewMsgCreateModel(
 		EnhancedSetupFlowTCRevision:                enhancedSetupFlowTCRevision,
 		EnhancedSetupFlowTCDigest:                  enhancedSetupFlowTCDigest,
 		EnhancedSetupFlowTCFileSize:                enhancedSetupFlowTCFileSize,
-		MaintenanceUrl:                             maintenanceURL,
+		EnhancedSetupFlowMaintenanceUrl:            enhancedSetupFlowMaintenanceURL,
 		SchemaVersion:                              schemaVersion,
 		CommissioningFallbackUrl:                   commissioningFallbackURL,
 	}
@@ -152,7 +152,7 @@ func NewMsgUpdateModel(
 	enhancedSetupFlowTCRevision int32,
 	enhancedSetupFlowTCDigest string,
 	enhancedSetupFlowTCFileSize uint32,
-	maintenanceURL string,
+	enhancedSetupFlowMaintenanceURL string,
 	commissioningFallbackURL string,
 	commissioningModeSecondaryStepsHint uint32,
 	icdUserActiveModeTriggerHint uint32,
@@ -182,7 +182,7 @@ func NewMsgUpdateModel(
 		EnhancedSetupFlowTCRevision:         enhancedSetupFlowTCRevision,
 		EnhancedSetupFlowTCDigest:           enhancedSetupFlowTCDigest,
 		EnhancedSetupFlowTCFileSize:         enhancedSetupFlowTCFileSize,
-		MaintenanceUrl:                      maintenanceURL,
+		EnhancedSetupFlowMaintenanceUrl:     enhancedSetupFlowMaintenanceURL,
 		SchemaVersion:                       schemaVersion,
 		CommissioningFallbackUrl:            commissioningFallbackURL,
 		CommissioningModeSecondaryStepsHint: commissioningModeSecondaryStepsHint,

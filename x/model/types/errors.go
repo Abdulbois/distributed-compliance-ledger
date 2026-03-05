@@ -31,6 +31,7 @@ var (
 	ErrEnhancedSetupFlowTCRevisionInvalid              = errors.Register(ModuleName, 527, "enhanced setup flow TC revision invalid")
 	ErrComplianceInfoSoftwareVersionStringDoesNotMatch = errors.Register(ModuleName, 528, "compliance info software version string does not match")
 	ErrComplianceInfoCDVersionNumberDoesNotMatch       = errors.Register(ModuleName, 529, "compliance info CD version number does not match")
+	ErrUnsupportedOtaChecksumType                      = errors.Register(ModuleName, 530, "unsupported OTA checksum type")
 )
 
 func NewErrModelAlreadyExists(vid interface{}, pid interface{}) error {
@@ -140,6 +141,10 @@ func NewErrModelVersionDeletionCertified(vid interface{}, pid interface{}, softw
 func NewErrOtaChecksumIsNotBase64Encoded(otaChecksum string) error {
 	return errors.Wrapf(ErrFieldIsNotBase64Encoded,
 		"OtaChecksum %v is not base64 encoded", otaChecksum)
+}
+
+func NewErrUnsupportedOtaChecksumType(otaChecksumType int32) error {
+	return errors.Wrapf(ErrUnsupportedOtaChecksumType, "OtaChecksumType %v is not supported", otaChecksumType)
 }
 
 func NewErrEnhancedSetupFlowTCDigestIsNotBase64Encoded(enhancedSetupFlowTCDigest string) error {
