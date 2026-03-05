@@ -50,8 +50,8 @@ result=$(get_txn_result "$result")
 echo "$result"
 check_response "$result" "\"code\": 0"
 
-echo "Get Device Software Compliance with CDCertificateID: {$cd_certificate_id}"
-result=$(dcld query compliance device-software-compliance --cdCertificateId="$cd_certificate_id")
+echo "Get Compliance Info for Model with VID: ${vid} PID: ${pid} SV: ${sv} for ZB"
+result=$(dcld query compliance compliance-info --vid=$vid --pid=$pid --softwareVersion=$sv --certificationType=$certification_type_zb)
 check_response "$result" "\"vid\": $vid"
 check_response "$result" "\"pid\": $pid"
 check_response "$result" "\"softwareVersion\": $sv"
