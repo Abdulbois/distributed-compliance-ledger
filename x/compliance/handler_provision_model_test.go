@@ -101,6 +101,18 @@ func TestHandler_ProvisionModel_WithAllOptionalFlagsForAllCertificationTypes(t *
 	}
 }
 
+func TestHandler_ProvisionModelWhenModelVersionDoesNotExist(t *testing.T) {
+	setup := setup(t)
+	vid, pid, softwareVersion := testconstants.Vid, testconstants.Pid, testconstants.SoftwareVersion
+	setup.setNoModelVersionForKey(vid, pid, softwareVersion)
+
+	provisionModelMsg, provisionModelErr := setup.provisionModel(vid, pid, softwareVersion, testconstants.SoftwareVersionString, types.ZigbeeCertificationType, setup.CertificationCenter)
+	require.NoError(t, provisionModelErr)
+
+	setup.checkComplianceInfoEqualsProvisionModelMsgData(t, provisionModelMsg)
+	setup.checkModelProvisioned(t, provisionModelMsg)
+}
+
 func TestHandler_ProvisionModel_ByWrongRoles(t *testing.T) {
 	setup, vid, pid, softwareVersion, softwareVersionString, certificationType := setupProvisionModel(t)
 
