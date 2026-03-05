@@ -640,7 +640,7 @@ func TestComplianceHistoryCountLimit(t *testing.T) {
 		_, revokeModelErr := setup.Handler(setup.Ctx, revokeModelMsg)
 		require.NoError(t, revokeModelErr)
 
-		reasonCount = reasonCount + 2
+		reasonCount += 2
 	}
 
 	// query compliance info
