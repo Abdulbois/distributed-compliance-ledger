@@ -141,7 +141,7 @@ is written on the ledger (`CERTIFY_MODEL` was called), or
 
 Sets provisional state for the Model Version.
 
-The corresponding Model and Model Version is required to be present in the ledger.
+The corresponding Model and Model Version are not required to be present in the ledger. It can be added later by Vendors.
 
 Can not be set if there is already a certification record on the ledger (certified or revoked).
 

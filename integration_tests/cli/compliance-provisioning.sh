@@ -44,6 +44,28 @@ schema_version_0=0
 
 test_divider
 
+echo "Provision unknown Model with VID: $vid PID: $pid  SV: ${sv} with zigbee certification"
+result=$(echo "$passphrase" | dcld tx compliance provision-model --vid=$vid --pid=$pid --softwareVersion=$sv --softwareVersionString=$svs --certificationType=$certification_type_zb --provisionalDate="$provision_date" --cdCertificateId="$cd_certificate_id" --cdVersionNumber=1 --from $zb_account --yes)
+result=$(get_txn_result "$result")
+echo "$result"
+check_response "$result" "\"code\": 0"
+
+echo "Get Compliance Info for Model with VID: ${vid} PID: ${pid} SV: ${sv} for ZB"
+result=$(dcld query compliance compliance-info --vid=$vid --pid=$pid --softwareVersion=$sv --certificationType=$certification_type_zb)
+check_response "$result" "\"vid\": $vid"
+check_response "$result" "\"pid\": $pid"
+check_response "$result" "\"softwareVersion\": $sv"
+check_response "$result" "\"softwareVersionString\": \"$svs\""
+check_response "$result" "\"certificationType\": \"$certification_type_zb\""
+check_response "$result" "\"date\": \"$provision_date\""
+check_response "$result" "\"cDCertificateId\": \"$cd_certificate_id\""
+
+echo "Delete compliance info vid=$vid pid=$pid softwareVersion=$sv certificationType=$certification_type_zb"
+result=$(echo "$passphrase" | dcld tx compliance delete-compliance-info --vid=$vid --pid=$pid --softwareVersion=$sv --certificationType=$certification_type_zb --from=$zb_account --yes)
+result=$(get_txn_result "$result")
+
+test_divider
+
 echo "Add Model and a New Model Version with VID: $vid PID: $pid SV: $sv"
 create_model_and_version $vid $pid $sv $svs $vendor_account
 
