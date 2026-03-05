@@ -8804,7 +8804,7 @@ paths:
                     enhancedSetupFlowTCFileSize:
                       type: integer
                       format: int64
-                    maintenanceUrl:
+                    enhancedSetupFlowMaintenanceUrl:
                       type: string
                     discoveryCapabilitiesBitmask:
                       type: integer
@@ -9058,7 +9058,7 @@ paths:
                   enhancedSetupFlowTCFileSize:
                     type: integer
                     format: int64
-                  maintenanceUrl:
+                  enhancedSetupFlowMaintenanceUrl:
                     type: string
                   discoveryCapabilitiesBitmask:
                     type: integer
@@ -23539,7 +23539,7 @@ definitions:
       enhancedSetupFlowTCFileSize:
         type: integer
         format: int64
-      maintenanceUrl:
+      enhancedSetupFlowMaintenanceUrl:
         type: string
       discoveryCapabilitiesBitmask:
         type: integer
@@ -23700,7 +23700,7 @@ definitions:
             enhancedSetupFlowTCFileSize:
               type: integer
               format: int64
-            maintenanceUrl:
+            enhancedSetupFlowMaintenanceUrl:
               type: string
             discoveryCapabilitiesBitmask:
               type: integer
@@ -23808,7 +23808,7 @@ definitions:
           enhancedSetupFlowTCFileSize:
             type: integer
             format: int64
-          maintenanceUrl:
+          enhancedSetupFlowMaintenanceUrl:
             type: string
           discoveryCapabilitiesBitmask:
             type: integer

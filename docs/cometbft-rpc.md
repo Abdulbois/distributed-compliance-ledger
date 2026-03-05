@@ -127,7 +127,7 @@ dcld tx auth propose-add-account \
 
 ### Decoding The Transaction String 
 
-The details of transaction payload encoding can be found [here](https://docs.cosmos.network/main/core/encoding#transaction-encoding). Thus, the transaction payload/string in the example above can be decoded as follows:
+The details of transaction payload encoding can be found [here](https://docs.cosmos.network/sdk/v0.47/learn/advanced/encoding#transaction-encoding). Thus, the transaction payload/string in the example above can be decoded as follows:
 
 ```bash
 dcld tx decode CocCCoQCCkgvemlnYmVlYWxsaWFuY2UuZGlzdHJpYnV0ZWRjb21wbGlhbmNlbGVkZ2VyLmRjbGF1dGguTXNnUHJvcG9zZUFkZEFjY291bnQStwEKLWNvc21vczE0cG1nMnhnMzd0enI2a3VxNHV4dnp3a3p1ZnRldGQ3dDhhMnN1dRItY29zbW9zMXNkZzV2a3B6OXVyY2VtbXc2N2xueHZ6aGh1dmVxZTZ2NzBleDJsGkYKHy9jb3Ntb3MuY3J5cHRvLnNlY3AyNTZrMS5QdWJLZXkSIwohA4m98FT/tgsMWZuVBlavWmawwXrvv/nUMhDlU8QsHlOMIglOb2RlQWRtaW44lo/YoAYSWApQCkYKHy9jb3Ntb3MuY3J5cHRvLnNlY3AyNTZrMS5QdWJLZXkSIwohApEHaI8+Wj64IQdR/WZDMaWHNd53+9G19zNcWjrAiXMbEgQKAggBGAISBBDAmgwaQJCg0T8phCo70H7VpL2M1C0kQix4LeVOjkXWgK3EHmFobXkBGLH2jJiKTHakVWUO2yj2Tdpc4YoTDw2eKe6UZj8=
